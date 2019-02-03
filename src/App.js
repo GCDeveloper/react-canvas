@@ -1,25 +1,32 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
+  resize(){
+    this.w = window.innerWidth;
+    this.h = window.innerHeight;
+    this.canvasElement.width = this.w;
+    this.canvasElement.height = this.h;
+  }
+  componentDidMount(){
+    this.resize();
+    window.addEventListener("resize", ()=>{
+      this.resize();
+    });
+    this.ctx = this.canvasElement.getContext('2d');
+    const ctx = this.ctx;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(this.w, this.h);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'black';
+    ctx.stroke();
+    ctx.closePath();
+  }
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <canvas ref={(el)=>this.canvasElement = el}></canvas>
       </div>
     );
   }
