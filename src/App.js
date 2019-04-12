@@ -13,29 +13,52 @@ class App extends Component {
     this.zoom = this.getZoom();
     this.allowLoop = true;
     this.frame = 0;
-    this.startCs = 24;
+    this.startCs = 48;
     this.nMaps = 14;
 
     this.openSimplex = new OpenSimplexNoise(Date.now());
   }
-  reset = () => {
+  reset = (n = 1) => {
+    this.startCs = Math.max(12, Math.floor(this.startCs*n));
+    //this.nMaps = Math.floor(this.nMaps*n);
+    this.frame = 0;
     this.cs = this.createCs(this.startCs);
     this.noiseMap = this.mapNoise(this.nMaps);
   }
   createCs = (n) => {
     const { w, h } = this;
     const cs = [];
-    const ar = 1;//Math.random()*4;
+    const dir = Math.random() > 0.5 ? 1 : -1;
+    const ar = (Math.random()*1+1)*dir;
+    const angle = Math.random()*Math.PI*2;
     for(let i = 0; i < n; i++){
       cs.push({
-        x: (i/n*2)*w-w/2*ar,//Math.random()*w-w/2,
-        y: (i/n*2)*h-h/2*ar,//Math.random()*h-h/2,
-        z: (i/n/10)*h/2,//Math.random()*6+0.5,
-        vx: (n-(i+1))/8,//Math.random()*6-3,
-        vy: -(n-(i+1))/8,//Math.random()*6-3,
-        vz: -0.01,//(i/n)/3,//Math.random()*0.02-0.01,
-        r: 10,//Math.random()*4+1
+        x: Math.cos(angle)*((i/n)*w*2),
+        y: Math.sin(angle)*((i/n)*h*2),
+        z: (i/n)*64,
+        vx: Math.cos(angle+Math.PI/2)*(i/n)*16,
+        vy: Math.sin(angle+Math.PI/2)*(i/n)*16,
+        vz: 0,
+        r: Math.random()*10+2
       })
+      // cs.push({
+      //   x: Math.cos(i/n*Math.PI*2)*(i/n*w/2),
+      //   y: Math.sin(i/n*Math.PI*2)*(i/n*h/2),
+      //   z: Math.sin(i/n*Math.PI*2)*16,
+      //   vx: Math.cos(i/n*Math.PI*2+Math.PI/2)*Math.PI/2,//Math.random()*6-3,
+      //   vy: Math.sin(i/n*Math.PI*2+Math.PI/2)*Math.PI/2,//Math.random()*6-3,
+      //   vz: 0,//(i/n)/3,//Math.random()*0.02-0.01,
+      //   r: 10//Math.random()*10+2
+      // })
+      // cs.push({
+      //   x: ((i/n*2)*w-w/2)*ar*Math.sin(i/n*2),//Math.random()*w-w/2,
+      //   y: ((i/n*2)*h-h/2)*ar*Math.sin(i/n*2),//Math.random()*h-h/2,
+      //   z: ((i/n*2)*h/4-h/8)*ar*Math.sin(i/n*2),//Math.random()*6+0.5,
+      //   vx: (n-(i+1))/8,//Math.random()*6-3,
+      //   vy: -(n-(i+1))/8,//Math.random()*6-3,
+      //   vz: -(n-(i+1))/128,//(i/n)/3,//Math.random()*0.02-0.01,
+      //   r: 10,//Math.random()*4+1
+      // })
     }
     return cs;
   }
@@ -61,21 +84,31 @@ class App extends Component {
           const yd = (y-jy);
           const zd = (z-jz);
           const d = ((xd**2)+(yd**2)+(zd**2))**0.5;
-          //if(d < r+jr){
-          //  jvx = -vx;
-          //  jvy = -vy;
-          //  jvz = -vz;
-          //}
-          jvx += xd/d**2;
-          jvy += yd/d**2;
-          jvz += zd/d**2;///((this.w+this.height)/2);
+          if(d < (r+jr)){
+            jvx *= 0.998;
+            jvy *= 0.998;
+            jvz *= 0.998;
+            if(d < (r+jr)*0.5){
+              jx -= xd/d;
+              jy -= yd/d;
+              jz -= zd/d;
+            }
+          } else {
+            jvx += xd/d**2;
+            jvy += yd/d**2;
+            jvz += zd/d**2;///((this.w+this.height)/2);
+          }
 
           const cj = {
             ...this.cs[j],
+            x: jx,
+            y: jy,
+            z: jz,
             vx: jvx,
             vy: jvy,
             vz: jvz,
-            r: jr
+            r: jr,
+            d
           }
           this.cs[j] = cj;
         }
@@ -92,7 +125,9 @@ class App extends Component {
     avgPos.x /= this.cs.length;
     avgPos.y /= this.cs.length;
     avgPos.z /= this.cs.length;
+    avgPos.z = Math.max(avgPos.z, 10);
     this.o = avgPos;
+    //console.log("avg:", this.o);
     this.zoom = this.getZoom();
   }
   draw(frame){
@@ -113,7 +148,7 @@ ctx.fillStyle='rgba(255,255,255,0.1)';
     //if(frame%4==2) ctx.globalCompositeOperation = 'hue' // reset to default value
     ctx.beginPath();
     this.cs.forEach(({x,y,z,r}) => {
-      z = z/zoom+zoom/((this.o.z**0.5)*2);//*((Math.cos(frame/20)+2));
+      z = z/zoom+zoom/((this.o.z**0.5)*4);//*((Math.cos(frame/20)+2));
       x -= this.o.x;
       y -= this.o.y;
       const xMid = w/2;
@@ -137,19 +172,23 @@ ctx.fillStyle='rgba(255,255,255,0.1)';
     ctx.closePath();
     ctx.fill();
       this.noiseMap[frame%this.nMaps] = this.mapNoise(1, frame)[0];
-      if(frame === 0){
+      //if(frame === 0){
         //ctx.fillStyle = 'rgba(255,255,255,1)';
         //ctx.fillRect(0,0,w,h);
-        this.zoom = 8;
-        ctx.putImageData(this.mapNoise(1, 10)[0], 0, 0);
+        //this.zoom = 8;
+        //ctx.putImageData(this.mapNoise(1, 10)[0], 0, 0);
 
-      }
-    if(frame%440 < 220){
-      ctx.globalCompositeOperation = 'source-in';
+    //  }
+    if(frame%1000 < 380){
+        ctx.globalCompositeOperation = 'source-in';
     } else {
       ctx.globalCompositeOperation = 'source-over';
     }
     this.postProcess(frame);
+    // if(frame % 8 === 0){
+    //   ctx.fillStyle='rgba(0,0,0,0.01)';
+    //   ctx.fillRect(0,0,w,h);
+    // }
   }
   mapNoise = (n, frame) => {
     const imageData = [];
@@ -202,20 +241,21 @@ ctx.fillStyle='rgba(255,255,255,0.1)';
          //const valueB = (openSimplex.noise2D(x / zoom*2 , y / zoom*2, frame/40) + 1);
          //const val = this.noiseMap[i];//(x / zoom , y / zoom) + 1)/2;
          const angle = Math.atan2(y-(h/2), x-(w/2)) * (180) / Math.PI + (Math.sin(frame/80)*Math.PI);
-         const dist = Math.max(0.1,(1-Math.sqrt((x-(w/2+(Math.cos(frame/50)*10)))**2+(y-(h/2+(Math.sin(frame/50)*10)))**2)/Math.min(w,h)*2)*(32+(Math.cos(frame/30)*6)))
+         const dist = Math.max(0.1,(1-Math.sqrt((x-(w/2+(Math.cos(frame/50)*10)))**2+(y-(h/2+(Math.sin(frame/50)*10)))**2)/Math.min(w,h)*(3.5+Math.cos(frame/20)*0.5))*(32+(Math.cos(frame/30)*6)));
+         const dist2 = (1-(Math.sqrt((x-(w/2))**2+(y-(h/2))**2)/((w+h)/(Math.sin(frame/40)*2+3))))*(((frame%1000)/(Math.sin(frame/500)*250+750)));
          const ax = x+Math.round(Math.cos(angle)*dist);
          const ay = y+Math.round(Math.sin(angle)*dist);
          const i = (x + y * w) * 4;
          const j = (ax + ay * w) * 4;
          //const val = valueB*dist*255 > 128? valueB : valueA;
         // const val = Math.sin(frame/16)+1;//valueA;
-         imageData.data[i] -= (imageData.data[i]-this.noiseMap[frame%this.nMaps].data[i])/(this.nMaps*6);
-         imageData.data[i + 1] -= (imageData.data[i + 1]-this.noiseMap[frame%this.nMaps].data[i + 1])/(this.nMaps*6);
-         imageData.data[i + 2] -= (imageData.data[i + 2]-this.noiseMap[frame%this.nMaps].data[i + 2])/(this.nMaps*6);
+         imageData.data[i] -= (imageData.data[i]-this.noiseMap[frame%this.nMaps].data[i])/(this.nMaps*6)*dist2;
+         imageData.data[i + 1] -= (imageData.data[i + 1]-this.noiseMap[frame%this.nMaps].data[i + 1])/(this.nMaps*6)*dist2;
+         imageData.data[i + 2] -= (imageData.data[i + 2]-this.noiseMap[frame%this.nMaps].data[i + 2])/(this.nMaps*6)*dist2;
          imageData.data[i + 3] = 255;
-         imageData.data[i] -= (imageData.data[i]-imageData.data[j])/(32+(Math.sin(frame/20)*6));
-         imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[j + 1])/(32+(Math.sin(frame/20)*6));
-         imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[j + 2])/(232+(Math.sin(frame/20)*6));
+         imageData.data[i] -= (imageData.data[i]-imageData.data[j])/(32+(Math.sin(frame/20)*6))*dist2;
+         imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[j + 1])/(32+(Math.sin(frame/20)*6))*dist2;
+         imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[j + 2])/(232+(Math.sin(frame/20)*6))*dist2;
          if( x > 4 && x < w-4 && y > 4 && y < h-4){
             let l = (x-(1) + y * w) * 4;
             let r = (x+(1) + y * w) * 4;
@@ -231,21 +271,21 @@ ctx.fillStyle='rgba(255,255,255,0.1)';
            //if(x < w){
 
            if(frame%4===0){
-             imageData.data[i] -= (imageData.data[i]-imageData.data[l])/9;
-             imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[l + 1])/9;
-             imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[l + 2])/9;
+             imageData.data[i] -= (imageData.data[i]-imageData.data[l])/9*dist2;
+             imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[l + 1])/9*dist2;
+             imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[l + 2])/9*dist2;
            }
            if(frame%4===1){
-             imageData.data[i] -= (imageData.data[i]-imageData.data[d])/9;
-             imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[d + 1])/9;
-             imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[d + 2])/9;
+             imageData.data[i] -= (imageData.data[i]-imageData.data[d])/9*dist2;
+             imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[d + 1])/9*dist2;
+             imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[d + 2])/9*dist2;
            }
            //}
           // if(x > 0){
           if(frame%4===2){
-             imageData.data[i] -= (imageData.data[i]-imageData.data[r])/9;
-             imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[r + 1])/9;
-             imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[r + 2])/9;
+             imageData.data[i] -= (imageData.data[i]-imageData.data[r])/9*dist2;
+             imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[r + 1])/9*dist2;
+             imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[r + 2])/9*dist2;
            }
         //  }
         //   if(y < h){
@@ -253,11 +293,20 @@ ctx.fillStyle='rgba(255,255,255,0.1)';
           // }
           // if(y > 0){
           if(frame%4===3){
-             imageData.data[i] -= (imageData.data[i]-imageData.data[u])/9;
-             imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[u + 1])/9;
-             imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[u + 2])/9;
+             imageData.data[i] -= (imageData.data[i]-imageData.data[u])/9*dist2;
+             imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[u + 1])/9*dist2;
+             imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[u + 2])/9*dist2;
            }
           // }
+         }
+         if(frame % 1000 > 900 && frame % 1000 < 950){
+           imageData.data[i] -= 2;
+           imageData.data[i + 1] -= 2;
+           imageData.data[i + 2] -= 2;
+         } else if(frame % 1000 >= 950 && frame % 2 === 0){
+           imageData.data[i] -= 1.5;
+           imageData.data[i + 1] -= 1.5;
+           imageData.data[i + 2] -= 1.5;
          }
        }
      }
@@ -266,23 +315,45 @@ ctx.fillStyle='rgba(255,255,255,0.1)';
   getZoom(){
     return Math.pow((this.w+this.h)/2, 0.5);
   }
+  ms = [];
   loop(){
     //this.cs.push(this.createCs(1)[0]);
     //this.startCs++;
     if(this.allowLoop){
+      this.t0 = performance.now();
       this.update(this.frame)
       //while(this.frame < 100){
         this.draw(this.frame);
         this.frame ++;
     //  }
+      this.t1 = performance.now();
+      this.ms.push(this.t1-this.t0);
+      if(this.ms.length > 4){
+        this.ms.shift();
+      }
+      if(this.frame < 60 && this.ms.reduce((acc,val)=>acc+val)/this.ms.length > 100){
+        //console.log("too slow");
+        this.reset();
+        this.resize(this.w*0.9, this.h*0.9);
+        console.log("reset..");
+      }
       requestAnimationFrame(()=>this.loop());
     }
   }
-  resize(){
-    this.w = 320;//window.innerWidth;
-    this.h = 320;//window.innerHeight;
+  resize(w = 480,h = 480){
+    this.w = Math.round(Math.max(w, 16));
+    this.h = Math.round(Math.max(h, 16));
     this.canvasElement.width = this.w;
     this.canvasElement.height = this.h;
+    const ww = window.innerWidth;
+    const wh = window.innerHeight;
+    const size = Math.min(ww, wh);
+    const left = ww/2-size/2;
+    const top = wh/2-size/2;
+    this.canvasElement.style.width = size+"px";
+    this.canvasElement.style.height = size+"px";
+    this.canvasElement.style.left = left+"px";
+    this.canvasElement.style.top = top+"px";
     this.zoom = this.getZoom();
   }
   componentDidMount(){
