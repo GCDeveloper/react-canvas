@@ -1,7 +1,14 @@
 import React, { Component } from 'react';
 import './App.css';
 import OpenSimplexNoise from 'open-simplex-noise';
-
+let mouseRadius = 250;
+let dotRepelRadius = 50;
+let dotRadius = 2.5;
+let dotsToSpawn = 100;
+let mx = 0;
+let my = 0;
+let ox = 0;
+let oy = 0;
 class App extends Component {
   constructor(){
     super();
