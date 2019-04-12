@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
 import OpenSimplexNoise from 'open-simplex-noise';
-let mouseRadius = 60;
-let dotRepelRadius = 20;
+let mouseRadius = 80;
+let dotRepelRadius = 10;
 let dotRadius = 2.5;
 let dotsToSpawn = 100;
 let mx = 0;
@@ -113,7 +113,7 @@ class App extends Component {
               x += Math.cos(angle)*(dotRepelRadius/dist)*Math.abs(Math.sin(frame/xWarp));
               y += Math.sin(angle)*(dotRepelRadius/dist)*Math.abs(Math.cos(frame/yWarp));
             }
-          } else if(frame < 4200+(i)){
+          } else if(frame < 2300+(i)){
             if(frame === 1865+(i)){
               vx = Math.cos(angle-Math.PI/2)*Math.random()*2;
               vy = Math.sin(angle-Math.PI/2)*Math.random()*2;
@@ -158,7 +158,7 @@ class App extends Component {
              x += Math.cos(angle)*(dotRepelRadius/dist)*4;
              y += Math.sin(angle)*(dotRepelRadius/dist)*4;
            }
-           if(frame >= 4600+(i)){
+           if(frame >= 2800+(i)){
              frameDots = 0;
              frame = 0;
            }
@@ -312,19 +312,23 @@ ctx.fillStyle='rgba(255,255,255,0.1)';
     //if(frame%4==1) ctx.globalCompositeOperation = 'exclusion' // reset to default value
     //if(frame%4==2) ctx.globalCompositeOperation = 'hue' // reset to default value
     ctx.beginPath();
-    this.cs.forEach(({x,y,z,r}) => {
-      z = z/zoom+zoom/((this.o.z**0.5)*4);//*((Math.cos(frame/20)+2));
-      x -= this.o.x;
-      y -= this.o.y;
-      const xMid = w/2;
-      const nox = (x-xMid);
-      const yMid = h/2;
-      const noy = (h-yMid);
-      const newR = Math.max(r/(z), 0)*0.5;
+    if(frame % 4000 >= 2000) {
+      this.drawDots();
+    } else {
+      this.cs.forEach(({x,y,z,r}) => {
+        z = z/zoom+zoom/((this.o.z**0.5)*4);//*((Math.cos(frame/20)+2));
+        x -= this.o.x;
+        y -= this.o.y;
+        const xMid = w/2;
+        const nox = (x-xMid);
+        const yMid = h/2;
+        const noy = (h-yMid);
+        const newR = Math.max(r/(z), 0)*0.5;
 
-      ctx.moveTo(x/(z)+newR+xMid, y/(z)+yMid);
-      ctx.arc(x/(z)+xMid,y/(z)+yMid,newR,0,Math.PI*2);
-    });
+        ctx.moveTo(x/(z)+newR+xMid, y/(z)+yMid);
+        ctx.arc(x/(z)+xMid,y/(z)+yMid,newR,0,Math.PI*2);
+      });
+    }
     // if(frame % 2 === 0){
     //   const r = Math.random()*w*0.01+(2*0.005);
     //   const x = Math.random()*w;
@@ -334,7 +338,7 @@ ctx.fillStyle='rgba(255,255,255,0.1)';
     //
     //
     // }
-    this.drawDots();
+
     ctx.closePath();
     ctx.fill();
       this.noiseMap[frame%this.nMaps] = this.mapNoise(1, frame)[0];
@@ -487,10 +491,11 @@ ctx.fillStyle='rgba(255,255,255,0.1)';
     //this.startCs++;
     if(this.allowLoop){
       this.t0 = performance.now();
-      this.updateDots();
+      if(this.frame % 4000 >= 2000) this.updateDots();
       this.update(this.frame)
       //while(this.frame < 100){
         this.draw(this.frame);
+        if(this.frame % 4000 >= 2000) frameDots++;
         this.frame ++;
     //  }
       this.t1 = performance.now();
@@ -504,14 +509,17 @@ ctx.fillStyle='rgba(255,255,255,0.1)';
         this.resize(this.w*0.9, this.h*0.9);
         console.log("reset..");
       }
+      if(this.frame === 4000){
+        this.reset();
+      }
       requestAnimationFrame(()=>this.loop());
     }
   }
   resize(w = 480,h = 480){
     this.w = Math.round(Math.max(w, 16));
     this.h = Math.round(Math.max(h, 16));
-    mouseRadius = this.w/10;
-    dotRepelRadius = this.w/20;
+    mouseRadius = this.w*0.2;
+    dotRepelRadius = this.w*0.075;
     this.canvasElement.width = this.w;
     this.canvasElement.height = this.h;
     const ww = window.innerWidth;
