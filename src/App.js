@@ -23,6 +23,12 @@ class App extends Component {
     ctx.stroke();
     ctx.closePath();
   }
+  resize(){
+    this.w = window.innerWidth;
+    this.h = window.innerHeight;
+    this.canvasElement.width = this.w;
+    this.canvasElement.height = this.h;
+  }
   render() {
     return (
       <div className="App">
