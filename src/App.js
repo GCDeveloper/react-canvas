@@ -12,33 +12,19 @@ window.requestAnimFrame = (function(){
 })();
 
 class App extends Component {
-  constructor(props){
-    super(props);
-    this.ox = 0;
-    this.oy = 0;
-    this.pixelIds = [
-      {
-        colour: "white"
-      },
-      {
-        colour: "green"
-      },
-      {
-        colour: "red"
-      },
-      {
-        colour: "yellow",
-        onTick: (cell) => {
-          cell.spread(2);
-        }
-      },
-      {
-        colour: "purple",
-        onTick: (cell) => {
-          cell.spread(2);
-        }
-      }
-    ]
+  createPixelDefinition({
+    colour,
+    owner = 'empty',
+    onClick = Function.prototype,
+    onTick = Function.prototype
+  }){
+    if(!colour) throw new Error("colour required");
+    return {
+      colour,
+      onClick,
+      onTick,
+      owner
+    };
   }
   //init
   componentDidMount(){
@@ -55,6 +41,42 @@ class App extends Component {
       [0, 0],
       [0, 0]
     ];
+    //initialize offset x,y
+    this.ox = 0;
+    this.oy = 0;
+    const createPixelDefinition = this.createPixelDefinition;
+    //initialise pixel id definitions
+    this.pixelIds = [
+      createPixelDefinition({
+        colour: "white",
+        owner: "empty",
+        onClick: ()=>{
+          return 1;
+        }
+      }),
+      createPixelDefinition({
+        colour: "green",
+        owner: "player"
+      }),
+      createPixelDefinition({
+        colour: "red",
+        owner: "enemy"
+      }),
+      createPixelDefinition({
+        colour: "yellow",
+        owner: "player",
+        onTick: (cell) => {
+          cell.spread(2);
+        }
+      }),
+      createPixelDefinition({
+        colour: "purple",
+        owner: "enemy",
+        onTick: (cell) => {
+          cell.spread(2);
+        }
+      })
+    ]
     //begin loop which updates/draws each frame
     this.loop();
   }
@@ -69,15 +91,64 @@ class App extends Component {
     this.canvasElement.width = this.w;
     this.canvasElement.height = this.h;
   }
-  clickCellAtPosition(x,y){
-    const { w, h } = this;
-    
+  pointInRect(p, rect){
+    const { x, y } = p;
+    const { x: rx, y: ry, w: rw, h: rh } = rect;
+    return (x >= rx && x <= rx+rw && y >= ry && y <= ry+rh);
+  }
+  clickCellAtPosition(mx,my){
+    const mousePos = {
+      x: mx,
+      y: my
+    };
+    const { cellSize, rows, cols, ox, oy, pixels, pixelIds } = this;
+    for(let x = 0; x < cols; x++){
+      for(let y = 0; y < rows; y++){
+        const pixel = pixelIds[pixels[x][y]];
+        const rect = {
+          x: ox+(x*cellSize),
+          y: oy+(y*cellSize),
+          w: cellSize,
+          h: cellSize
+        }
+        if(this.pointInRect(mousePos, rect)){
+          //click this cell
+          pixels[x][y] = pixel.onClick() || pixels[x][y];
+        }
+      }
+    }
   }
   update(){
-    const { w, h, pixels } = this;
+    let { w, h, pixels, pixelIds, rows, cols } = this;
+    //if all cells visible are owned by the player
+    //expand the map size
+    const playerOwnsAll = pixels.every((rows) => {
+      return rows.every((pixelId) => {
+        const pixel = pixelIds[pixelId];
+        return (pixel.owner === 'player');
+      })
+    });
+    if(playerOwnsAll){
+      //expand map size
+      //expand cols left and right
+      const newPixels = [];
+      const spread = 1;//+1 column/row per side
+      for(let x=-spread;x<cols+spread;x++){
+        newPixels.push([]);
+        for(let y = -spread; y < rows+spread; y++){
+          let pixelId = 0;
+          if(x >= 0 && x < cols && y >= 0 && y <rows){
+           pixelId = pixels[x][y];
+          }
+          newPixels[x+spread][y+spread] = pixelId;
+        }
+      }
+      this.pixels = newPixels;
+      pixels = this.pixels;
+    }
     //determine rows, cols, and cell size
-    const rows = pixels[0].length;
-    const cols = pixels.length;
+    rows = pixels[0].length;
+    cols = pixels.length;
     this.rows = rows;
     this.cols = cols;
     const cellWidth = w/rows;
