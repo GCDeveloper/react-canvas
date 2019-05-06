@@ -13,8 +13,8 @@ class App extends Component {
     this.h = window.innerHeight;
     this.canvasElement.width = this.w;
     this.canvasElement.height = this.h;
-ox = -this.w/2;
-oy = -this.h/2;
+    ox = -this.w/2;
+    oy = -this.h/2;
   }
   init(){
     const w = this.w;
@@ -30,16 +30,65 @@ oy = -this.h/2;
       });
     }
   }
+  onClick = () => {
+    this.xtype = Math.random() > 0.5 ? 'sin' : 'cos';
+    this.ytype = Math.random() > 0.5 ? 'sin' : 'cos';
+    this.xi = Math.ceil(Math.random()*6);
+    this.yi = Math.ceil(Math.random()*6);
+    this.db = Math.random()*100+50;
+    const ctx = this.ctx;
+    ctx.fillStyle='rgba(0,0,0,1)';
+    ctx.fillRect(0,0,this.w,this.h);
+    this.prev = {x: null, y:null};
+  }
   update(mx, my){
-    let bnd = v => Math.abs(Math.min(v,2))-1;
-    tx = bnd(Math.cos(frame/100)+Math.cos(frame/50));
-    ty = bnd(Math.sin(frame/50)*Math.sin(frame/50));
+    let wav = (iteration, {frame, prevVal = 1, iterations, type, divideBy, divideChanger}) => {
+      let vals = [];
+      let fn;
+      for(let i=0;i<iterations;i++){
+        let poop;
+        if(type === 'sin') {
+          type = 'cos';
+          poop = Math.sin(frame/divideBy);
+        } else if(type === 'cos'){
+          type = 'sin';
+          poop = Math.cos(frame/divideBy);
+        }
+        vals.push(poop);
+        divideBy = divideChanger(divideBy);
+      }
+      let output = 0;
+      vals.forEach((val, i)=>{
+        if(i === 0){
+          output = val;
+        } else {
+          output *= val;
+        }
+      })
+      return output;
+    }
+    const { xtype, ytype, xi, yi, db } = this;
+    tx = wav(0, {
+      frame,
+      type:xtype,
+      iterations:xi,
+      divideBy:db,
+      divideChanger: (v)=>v/2
+    });
+    ty = wav(0, {
+      frame,
+      type:ytype,
+      iterations:yi,
+      divideBy:db,
+      divideChanger: (v)=>v/2
+    });
+    //tx = Math.sin(frame/100);
+    //ty = Math.cos(frame/100);
     const w = this.w;
     const h = this.h;
     let xCount = 0;
     let yCount = 0;
     //const wh = w*h;
-    console.log(frame);
     dots = dots.map(({x,y,vx,vy,r}, i) => {
      // xCount += x;
      // yCount += y;
@@ -51,22 +100,45 @@ oy = -this.h/2;
 //    ox = xCount/dots.length-w/2;
 //    oy = yCount/dots.length-h/2;
   }
+  prev = {
+    x: null,
+    y: null
+  }
+  
   draw(){
+    let prev = this.prev;
     const w = this.w;
     const h = this.h;
     const ctx = this.ctx;
-    if(frame % 10 === 0) {
+    if(frame <= 1){
+      ctx.fillStyle='rgba(0,0,0,1)';
+      ctx.fillRect(0,0,w,h);
+    }
+    if(frame % 40 === 0) {
       ctx.fillStyle='rgba(0,0,0,0.05)';
       ctx.fillRect(0,0,w,h);
     }
+    
     ctx.beginPath();
     dots.forEach(({x,y,r}) => {
-      ctx.moveTo(Math.round(x+r-ox), Math.round(y-oy));
-      ctx.arc(Math.round(x-ox), Math.round(y-oy), r, 0, Math.PI*2);
+      console.log()
+      if(prev.x !== null && prev.y !== null){
+        ctx.moveTo(Math.round(prev.x-ox), Math.round(prev.y-oy));
+        ctx.lineTo(Math.round(x-ox), Math.round(y-oy));
+      }
+       // ctx.moveTo(Math.round(x+r-ox), Math.round(y-oy));
+      //  ctx.arc(Math.round(x-ox), Math.round(y-oy), r, 0, Math.PI*2);
+    
+      this.prev = {
+        x,
+        y
+      }
     });
     ctx.closePath();
     ctx.fillStyle = 'white';
+    ctx.strokeStyle = 'red';
     ctx.fill();
+    ctx.stroke();
   }
   loop(){
     frame ++;
@@ -92,7 +164,7 @@ oy = -this.h/2;
   render() {
     return (
       <div className="App">
-        <canvas ref={(el)=>this.canvasElement = el}></canvas>
+        <canvas ref={(el)=>this.canvasElement = el} onClick={this.onClick}></canvas>
       </div>
     );
   }
