@@ -35,12 +35,24 @@ class App extends Component {
   xi = 3;
   yi = 2;
   db = 50;
-  onClick = e => {
-    const r = 10;
-    //const x = (e.pageX / window.innerWidth) * this.w - r;
-    //const y = (e.pageY / window.innerHeight) * this.h - r;
-    const x = this.w / 2;
-    const y = this.h / 2;
+  randomColour = () => {
+    const rnd = () => Math.floor(Math.random() * 256);
+    return `rgb(${rnd()},${rnd()},${rnd()})`;
+  };
+  onMouseDown = e => {
+    this.mouseIsDown = true;
+  };
+  onMouseUp = e => {
+    this.mouseIsDown = false;
+  };
+  onMouseMove = e => {
+    if (!this.mouseIsDown) return;
+    const r = (Math.random() * 10) / Math.min(1.5, frame / 1000);
+    const rect = e.target.getBoundingClientRect();
+    const x = (e.pageX - rect.x) * 1.07 - r;
+    const y = (e.pageY / this.w) * this.h * 1.065 - 2;
+    // const x = this.w / 2;
+    // const y = this.h / 2;
     console.log(x, y);
     this.xtype = Math.random() > 0.5 ? 'sin' : 'cos';
     this.ytype = Math.random() > 0.5 ? 'sin' : 'cos';
@@ -51,12 +63,18 @@ class App extends Component {
     // ctx.fillStyle = 'rgba(0,0,0,1)';
     // ctx.fillRect(0, 0, this.w, this.h);
     this.prev = { x: null, y: null };
-    ctx.fillStyle = 'rgb(255,0,0)';
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.arc(x + r, y, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.closePath();
+    for (let i = 0; i < 10; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const d = Math.random() * r * 7;
+      const xen = Math.cos(angle) * d;
+      const yen = Math.sin(angle) * d;
+      ctx.fillStyle = this.randomColour();
+      ctx.beginPath();
+      ctx.moveTo(x + xen, y + yen);
+      ctx.arc(x + r + xen, y + yen, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.closePath();
+    }
   };
   update(mx, my) {
     let wav = (
@@ -171,36 +189,62 @@ class App extends Component {
           // imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[j + 1])/(32+(Math.sin(frame/20)*6))*dist2;
           // imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[j + 2])/(232+(Math.sin(frame/20)*6))*dist2;
           if (x > 4 && x < w - 4 && y > 4 && y < h - 4) {
-            let l = (x - 1 + y * w) * 4;
-            let r = (x + 1 + y * w) * 4;
-            let u = (x + (y - 1) * w) * 4;
-            let d = (x + (y + 1) * w) * 4;
-            if (frame % 2 === 0) {
-              imageData.data[l] += 2;
+            //if (frame % 2 === 0) {
+            for (let ic = 0; ic < 3; ic++) {
+              let l = (x - 1 + y * w) * 4;
+              let r = (x + 1 + y * w) * 4;
+              let u = (x + (y - 1) * w) * 4;
+              let d = (x + (y + 1) * w) * 4;
+              imageData.data[l + ic] +=
+                ((imageData.data[r + ic] +
+                  imageData.data[u + ic] +
+                  imageData.data[d + ic]) /
+                  3 -
+                  imageData.data[l + ic]) /
+                8;
+              //}
+              //if (frame % 2 === 0) {
+              imageData.data[r + ic] +=
+                ((imageData.data[l + ic] +
+                  imageData.data[u + ic] +
+                  imageData.data[d + ic]) /
+                  3 -
+                  imageData.data[r + ic]) /
+                8;
+              // }
+              //if (frame % 2 === 0) {
+              imageData.data[u + ic] +=
+                ((imageData.data[r + ic] +
+                  imageData.data[l + ic] +
+                  imageData.data[d + ic]) /
+                  3 -
+                  imageData.data[u + ic]) /
+                8;
+              // }
+              // if (frame % 2 === 0) {
+              imageData.data[d + ic] +=
+                ((imageData.data[r + ic] +
+                  imageData.data[u + ic] +
+                  imageData.data[l + ic]) /
+                  3 -
+                  imageData.data[d + ic]) /
+                8;
             }
-            if (frame % 2 === 0) {
-              imageData.data[r] += 2;
-            }
-            if (frame % 2 === 0) {
-              imageData.data[u] += 2;
-            }
-            if (frame % 2 === 0) {
-              imageData.data[d] += 2;
-            }
+            // }
 
-            imageData.data[l] += imageData.data[u] / 64;
-            imageData.data[r] += imageData.data[d] / 64;
-            imageData.data[u] += imageData.data[r] / 64;
-            imageData.data[d] += imageData.data[l] / 64;
+            // imageData.data[l] += imageData.data[u] / 64;
+            // imageData.data[r] += imageData.data[d] / 64;
+            // imageData.data[u] += imageData.data[r] / 64;
+            // imageData.data[d] += imageData.data[l] / 64;
 
-            if (Math.abs(imageData.data[l] - imageData.data[r]) < 64) {
-              imageData.data[l] *= 0.98;
-              imageData.data[r] *= 0.98;
-            }
-            if (Math.abs(imageData.data[u] - imageData.data[d]) < 64) {
-              imageData.data[u] *= 0.5;
-              imageData.data[d] *= 0.98;
-            }
+            // if (Math.abs(imageData.data[l] - imageData.data[r]) < 64) {
+            //   imageData.data[l] *= 0.99;
+            //   imageData.data[r] *= 0.99;
+            // }
+            // if (Math.abs(imageData.data[u] - imageData.data[d]) < 64) {
+            //   imageData.data[u] *= 0.99;
+            //   imageData.data[d] *= 0.99;
+            // }
 
             //  if(Math.random() > 0.5){
             //   imageData.data[l+1] += Math.round(Math.sin(frame/10)*2);
@@ -244,10 +288,10 @@ class App extends Component {
       ctx.fillStyle = 'rgba(0,0,0,1)';
       ctx.fillRect(0, 0, w, h);
     }
-    if (frame % 40 === 0) {
-      ctx.fillStyle = 'rgba(0,0,0,0.05)';
-      ctx.fillRect(0, 0, w, h);
-    }
+    // if (frame % 40 === 0) {
+    //   ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    //   ctx.fillRect(0, 0, w, h);
+    // }
 
     const r = Math.floor(Math.sin((frame + 20) / 60.7) * 100 + 156);
     const g = Math.floor(Math.sin((frame + 10) / 43.4) * 100 + 156);
@@ -281,10 +325,10 @@ class App extends Component {
     this.update(mx, my);
     this.draw();
 
-    while (frame % 100 !== 0) {
-      return this.loop();
-    }
-    console.log('req anim frame');
+    // while (frame % 40 !== 0) {
+    //   return this.loop();
+    // }
+    //console.log('req anim frame');
     requestAnimationFrame(() => {
       this.loop();
     });
@@ -305,7 +349,17 @@ class App extends Component {
   render() {
     return (
       <div className='App'>
-        <canvas ref={el => (this.canvasElement = el)} onClick={this.onClick} />
+        <canvas
+          ref={el => (this.canvasElement = el)}
+          onMouseDown={this.onMouseDown}
+          onMouseUp={this.onMouseUp}
+          onMouseMove={this.onMouseMove}
+          onClick={e => {
+            this.onMouseDown(e);
+            this.onMouseMove(e);
+            this.onMouseUp(e);
+          }}
+        />
       </div>
     );
   }
