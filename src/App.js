@@ -8,25 +8,25 @@ let oy = 0;
 let tx, ty;
 let frame = 0;
 class App extends Component {
-  resize(){
-    this.w = 640;//window.innerWidth;
-    this.h = 640;//window.innerHeight;
+  resize() {
+    this.w = 640; //window.innerWidth;
+    this.h = 640; //window.innerHeight;
     this.canvasElement.width = this.w;
     this.canvasElement.height = this.h;
-    ox = -this.w/2;
-    oy = -this.h/2;
+    ox = -this.w / 2;
+    oy = -this.h / 2;
   }
-  init(){
+  init() {
     const w = this.w;
     const h = this.h;
     let dotsToSpawn = 1;
-    for(let i=0;i < dotsToSpawn;i++){
+    for (let i = 0; i < dotsToSpawn; i++) {
       dots.push({
         x: ox,
         y: oy,
-        vx:0,
-        vy:0,
-        r: 2
+        vx: 0,
+        vy: 0,
+        r: 2,
       });
     }
   }
@@ -35,61 +35,76 @@ class App extends Component {
   xi = 3;
   yi = 2;
   db = 50;
-  onClick = () => {
+  onClick = e => {
+    const r = 10;
+    //const x = (e.pageX / window.innerWidth) * this.w - r;
+    //const y = (e.pageY / window.innerHeight) * this.h - r;
+    const x = this.w / 2;
+    const y = this.h / 2;
+    console.log(x, y);
     this.xtype = Math.random() > 0.5 ? 'sin' : 'cos';
     this.ytype = Math.random() > 0.5 ? 'sin' : 'cos';
-    this.xi = Math.ceil(Math.random()*6);
-    this.yi = Math.ceil(Math.random()*6);
-    this.db = Math.random()*100+50;
+    this.xi = Math.ceil(Math.random() * 6);
+    this.yi = Math.ceil(Math.random() * 6);
+    this.db = Math.random() * 100 + 50;
     const ctx = this.ctx;
-    ctx.fillStyle='rgba(0,0,0,1)';
-    ctx.fillRect(0,0,this.w,this.h);
-    this.prev = {x: null, y:null};
-  }
-  update(mx, my){
-    let wav = (iteration, {frame, prevVal = 1, iterations, type, divideBy, divideChanger}) => {
+    // ctx.fillStyle = 'rgba(0,0,0,1)';
+    // ctx.fillRect(0, 0, this.w, this.h);
+    this.prev = { x: null, y: null };
+    ctx.fillStyle = 'rgb(255,0,0)';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.arc(x + r, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.closePath();
+  };
+  update(mx, my) {
+    let wav = (
+      iteration,
+      { frame, prevVal = 1, iterations, type, divideBy, divideChanger }
+    ) => {
       let vals = [];
       let fn;
-      for(let i=0;i<iterations;i++){
+      for (let i = 0; i < iterations; i++) {
         let poop;
-        if(type === 'sin') {
+        if (type === 'sin') {
           type = 'cos';
-          poop = Math.sin(frame/divideBy);
-        } else if(type === 'cos'){
+          poop = Math.sin(frame / divideBy);
+        } else if (type === 'cos') {
           type = 'sin';
-          poop = Math.cos(frame/divideBy);
+          poop = Math.cos(frame / divideBy);
         }
         vals.push(poop);
         divideBy = divideChanger(divideBy);
       }
       let output = 0;
-      vals.forEach((val, i)=>{
-        if(i === 0){
+      vals.forEach((val, i) => {
+        if (i === 0) {
           output = val;
         } else {
           output *= val;
         }
-      })
+      });
       return output;
-    }
+    };
     const { xtype, ytype, xi, yi, db } = this;
     tx = wav(0, {
       frame,
-      type:xtype,
-      iterations:xi,
-      divideBy:db,
-      divideChanger: (v)=>{
-        return v/2;
-      }
+      type: xtype,
+      iterations: xi,
+      divideBy: db,
+      divideChanger: v => {
+        return v / 2;
+      },
     });
     ty = wav(0, {
       frame,
-      type:ytype,
-      iterations:yi,
-      divideBy:db,
-      divideChanger: (v)=>{
-        return v/2;
-      }
+      type: ytype,
+      iterations: yi,
+      divideBy: db,
+      divideChanger: v => {
+        return v / 2;
+      },
     });
     //tx = Math.sin(frame/100);
     //ty = Math.cos(frame/100);
@@ -98,164 +113,188 @@ class App extends Component {
     let xCount = 0;
     let yCount = 0;
     //const wh = w*h;
-    dots = dots.map(({x,y,vx,vy,r}, i) => {
-     // xCount += x;
-     // yCount += y;
+    dots = dots.map(({ x, y, vx, vy, r }, i) => {
+      // xCount += x;
+      // yCount += y;
 
-      x = tx*w/4;
-      y = ty*h/4;
-      return {x,y,vx,vy,r}
+      x = (tx * w) / 4;
+      y = (ty * h) / 4;
+      return { x, y, vx, vy, r };
     });
-//    ox = xCount/dots.length-w/2;
-//    oy = yCount/dots.length-h/2;
+    //    ox = xCount/dots.length-w/2;
+    //    oy = yCount/dots.length-h/2;
   }
-  postProcess(frame){
+  postProcess(frame) {
     const { ctx, w, h } = this;
     const imageData = ctx.getImageData(0, 0, w, h);
     // const openSimplex = new OpenSimplexNoise(seed);
-    const r = Math.random()*0.03+0.96;
-    const g = Math.random()*0.03+0.96;
-    const b = Math.random()*0.03+0.96;
+    const r = Math.random() * 0.03 + 0.96;
+    const g = Math.random() * 0.03 + 0.96;
+    const b = Math.random() * 0.03 + 0.96;
     for (let x = 0; x < w; x++) {
       for (let y = 0; y < h; y++) {
         //const valueA = (openSimplex.noise2D(x / zoom , y / zoom, frame/40) + 1);
         //const valueB = (openSimplex.noise2D(x / zoom*2 , y / zoom*2, frame/40) + 1);
         //const val = this.noiseMap[i];//(x / zoom , y / zoom) + 1)/2;
-        const angle = Math.atan2(y-(h/2), x-(w/2)) * (180) / Math.PI + (Math.sin(frame/80)*Math.PI);
-        const dist = Math.max(0.1,(1-Math.sqrt((x-(w/2+(Math.cos(frame/50)*10)))**2+(y-(h/2+(Math.sin(frame/50)*10)))**2)/Math.min(w,h)*(3.5+Math.cos(frame/20)*0.5))*(32+(Math.cos(frame/30)*6)));
-        const dist2 = (1-(Math.sqrt((x-(w/2))**2+(y-(h/2))**2)/((w+h)/(Math.sin(frame/40)*2+3))))*(((frame%1000)/(Math.sin(frame/500)*250+750)));
-        const ax = x+Math.round(Math.cos(angle)*dist);
-        const ay = y+Math.round(Math.sin(angle)*dist);
+        const angle =
+          (Math.atan2(y - h / 2, x - w / 2) * 180) / Math.PI +
+          Math.sin(frame / 80) * Math.PI;
+        const dist = Math.max(
+          0.1,
+          (1 -
+            (Math.sqrt(
+              (x - (w / 2 + Math.cos(frame / 50) * 10)) ** 2 +
+                (y - (h / 2 + Math.sin(frame / 50) * 10)) ** 2
+            ) /
+              Math.min(w, h)) *
+              (3.5 + Math.cos(frame / 20) * 0.5)) *
+            (32 + Math.cos(frame / 30) * 6)
+        );
+        const dist2 =
+          (1 -
+            Math.sqrt((x - w / 2) ** 2 + (y - h / 2) ** 2) /
+              ((w + h) / (Math.sin(frame / 40) * 2 + 3))) *
+          ((frame % 1000) / (Math.sin(frame / 500) * 250 + 750));
+        const ax = x + Math.round(Math.cos(angle) * dist);
+        const ay = y + Math.round(Math.sin(angle) * dist);
         const i = (x + y * w) * 4;
         const j = (ax + ay * w) * 4;
-        if(imageData.data[i] > 64 || imageData.data[i + 1] > 64 || imageData.data[i + 2] > 64){
-        //const val = valueB*dist*255 > 128? valueB : valueA;
-      // const val = Math.sin(frame/16)+1;//valueA;
-        imageData.data[i + 3] = 255;
-        // imageData.data[i] -= (imageData.data[i]-imageData.data[j])/(32+(Math.sin(frame/20)*6))*dist2;
-        // imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[j + 1])/(32+(Math.sin(frame/20)*6))*dist2;
-        // imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[j + 2])/(232+(Math.sin(frame/20)*6))*dist2;
-        if( x > 4 && x < w-4 && y > 4 && y < h-4){
-          let l = (x-(1) + y * w) * 4;
-          let r = (x+(1) + y * w) * 4;
-          let u = (x + (y-(1)) * w) * 4;
-          let d = (x + (y+(1)) * w) * 4;
-          if(Math.random() > 0.4){
-            imageData.data[l] += Math.round(Math.sin(frame/51.8)*2);
-           }
-           if(Math.random() > 0.4){
-            imageData.data[r] += Math.round(Math.sin(frame/33.62)*2);
-           }
-           if(Math.random() > 0.6){
-            imageData.data[u] += Math.round(Math.sin(frame/44.4)*2);
-           }
-           if(Math.random() > 0.6){
-            imageData.data[d] += Math.round(Math.sin(frame/40)*2);
-           }
+        if (
+          imageData.data[i] > 64 ||
+          imageData.data[i + 1] > 64 ||
+          imageData.data[i + 2] > 64
+        ) {
+          //const val = valueB*dist*255 > 128? valueB : valueA;
+          // const val = Math.sin(frame/16)+1;//valueA;
+          imageData.data[i + 3] = 255;
+          // imageData.data[i] -= (imageData.data[i]-imageData.data[j])/(32+(Math.sin(frame/20)*6))*dist2;
+          // imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[j + 1])/(32+(Math.sin(frame/20)*6))*dist2;
+          // imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[j + 2])/(232+(Math.sin(frame/20)*6))*dist2;
+          if (x > 4 && x < w - 4 && y > 4 && y < h - 4) {
+            let l = (x - 1 + y * w) * 4;
+            let r = (x + 1 + y * w) * 4;
+            let u = (x + (y - 1) * w) * 4;
+            let d = (x + (y + 1) * w) * 4;
+            if (frame % 2 === 0) {
+              imageData.data[l] += 2;
+            }
+            if (frame % 2 === 0) {
+              imageData.data[r] += 2;
+            }
+            if (frame % 2 === 0) {
+              imageData.data[u] += 2;
+            }
+            if (frame % 2 === 0) {
+              imageData.data[d] += 2;
+            }
 
-           imageData.data[l] += imageData.data[u]/64;
-           imageData.data[r] += imageData.data[d]/64;
-           imageData.data[u] += imageData.data[r]/64;
-           imageData.data[d] += imageData.data[l]/64;
+            imageData.data[l] += imageData.data[u] / 64;
+            imageData.data[r] += imageData.data[d] / 64;
+            imageData.data[u] += imageData.data[r] / 64;
+            imageData.data[d] += imageData.data[l] / 64;
 
-           if(Math.abs(imageData.data[l]-imageData.data[r]) < 64){
-            imageData.data[l] *= 0.98;
-            imageData.data[r] *= 0.98;
-           }
-           if(Math.abs(imageData.data[u]-imageData.data[d]) < 64){
-            imageData.data[u] *= 0.98;
-            imageData.data[d] *= 0.98;
-           }
+            if (Math.abs(imageData.data[l] - imageData.data[r]) < 64) {
+              imageData.data[l] *= 0.98;
+              imageData.data[r] *= 0.98;
+            }
+            if (Math.abs(imageData.data[u] - imageData.data[d]) < 64) {
+              imageData.data[u] *= 0.5;
+              imageData.data[d] *= 0.98;
+            }
 
-          //  if(Math.random() > 0.5){
-          //   imageData.data[l+1] += Math.round(Math.sin(frame/10)*2);
-          //  }
-          //  if(Math.random() > 0.5){
-          //   imageData.data[r+1] += Math.round(Math.sin(frame/20)*2);
-          //  }
-          //  if(Math.random() > 0.5){
-          //   imageData.data[u+1] += Math.round(Math.sin(frame/30)*2);
-          //  }
-          //  if(Math.random() > 0.5){
-          //   imageData.data[d+1] += Math.round(Math.sin(frame/40)*2);
-          //  }
+            //  if(Math.random() > 0.5){
+            //   imageData.data[l+1] += Math.round(Math.sin(frame/10)*2);
+            //  }
+            //  if(Math.random() > 0.5){
+            //   imageData.data[r+1] += Math.round(Math.sin(frame/20)*2);
+            //  }
+            //  if(Math.random() > 0.5){
+            //   imageData.data[u+1] += Math.round(Math.sin(frame/30)*2);
+            //  }
+            //  if(Math.random() > 0.5){
+            //   imageData.data[d+1] += Math.round(Math.sin(frame/40)*2);
+            //  }
 
+            // imageData.data[l + 1] += Math.floor(Math.random()*2);
+            // imageData.data[r + 1] += Math.floor(Math.random()*2);
+            // imageData.data[u + 1] += Math.floor(Math.random()*2);
+            // imageData.data[d + 1] += Math.floor(Math.random()*2);
 
-          // imageData.data[l + 1] += Math.floor(Math.random()*2);
-          // imageData.data[r + 1] += Math.floor(Math.random()*2);
-          // imageData.data[u + 1] += Math.floor(Math.random()*2);
-          // imageData.data[d + 1] += Math.floor(Math.random()*2);
-
-          // imageData.data[l + 2] += Math.floor(Math.random()*2);
-          // imageData.data[r + 2] += Math.floor(Math.random()*2);
-          // imageData.data[u + 2] += Math.floor(Math.random()*2);
-          // imageData.data[d + 2] += Math.floor(Math.random()*2);
+            // imageData.data[l + 2] += Math.floor(Math.random()*2);
+            // imageData.data[r + 2] += Math.floor(Math.random()*2);
+            // imageData.data[u + 2] += Math.floor(Math.random()*2);
+            // imageData.data[d + 2] += Math.floor(Math.random()*2);
+          }
         }
       }
     }
-  }
     ctx.putImageData(imageData, 0, 0);
   }
   prev = {
     x: null,
-    y: null
-  }
-  
-  draw(){
+    y: null,
+  };
+
+  draw() {
     let prev = this.prev;
     const w = this.w;
     const h = this.h;
     const ctx = this.ctx;
-    if(frame <= 1){
-      ctx.fillStyle='rgba(0,0,0,1)';
-      ctx.fillRect(0,0,w,h);
+    if (frame <= 1) {
+      ctx.fillStyle = 'rgba(0,0,0,1)';
+      ctx.fillRect(0, 0, w, h);
     }
-    if(frame % 40 === 0) {
-      ctx.fillStyle='rgba(0,0,0,0.05)';
-      ctx.fillRect(0,0,w,h);
+    if (frame % 40 === 0) {
+      ctx.fillStyle = 'rgba(0,0,0,0.05)';
+      ctx.fillRect(0, 0, w, h);
     }
-    
-    const r = Math.floor(Math.sin((frame+20)/60.7)*100+156);
-    const g = Math.floor(Math.sin((frame+10)/43.4)*100+156);
-    const b = Math.floor(Math.sin((frame)/52.3)*100+156);
-    dots.forEach(({x,y}) => {
+
+    const r = Math.floor(Math.sin((frame + 20) / 60.7) * 100 + 156);
+    const g = Math.floor(Math.sin((frame + 10) / 43.4) * 100 + 156);
+    const b = Math.floor(Math.sin(frame / 52.3) * 100 + 156);
+    dots.forEach(({ x, y }) => {
       ctx.strokeStyle = `rgb(${r},${g},${b})`;
       ctx.beginPath();
-      if(prev.x !== null && prev.y !== null){
-        ctx.moveTo(Math.round(prev.x-ox), Math.round(prev.y-oy));
-        ctx.lineTo(Math.round(x-ox), Math.round(y-oy));
+      if (prev.x !== null && prev.y !== null) {
+        //ctx.moveTo(Math.round(prev.x - ox), Math.round(prev.y - oy));
+        // ctx.lineTo(Math.round(x - ox), Math.round(y - oy));
       }
       ctx.closePath();
       ctx.stroke();
-       // ctx.moveTo(Math.round(x+r-ox), Math.round(y-oy));
+      // ctx.moveTo(Math.round(x+r-ox), Math.round(y-oy));
       //  ctx.arc(Math.round(x-ox), Math.round(y-oy), r, 0, Math.PI*2);
-    
+
       this.prev = {
         x,
-        y
-      }
+        y,
+      };
     });
-   
+
     //ctx.fillStyle = 'white';
-    
+
     //ctx.fill();
-    
+
     this.postProcess(frame);
   }
-  loop(){
-    frame ++;
+  loop() {
+    frame++;
     this.update(mx, my);
     this.draw();
-    requestAnimationFrame(()=>{
-     this.loop();
+
+    while (frame % 100 !== 0) {
+      return this.loop();
+    }
+    console.log('req anim frame');
+    requestAnimationFrame(() => {
+      this.loop();
     });
   }
-  componentDidMount(){
+  componentDidMount() {
     this.resize();
-    window.addEventListener("resize", ()=>{
+    window.addEventListener('resize', () => {
       this.resize();
     });
-    document.addEventListener("mousemove", (e)=>{
+    document.addEventListener('mousemove', e => {
       mx = e.pageX;
       my = e.pageY;
     });
@@ -265,8 +304,8 @@ class App extends Component {
   }
   render() {
     return (
-      <div className="App">
-        <canvas ref={(el)=>this.canvasElement = el} onClick={this.onClick}></canvas>
+      <div className='App'>
+        <canvas ref={el => (this.canvasElement = el)} onClick={this.onClick} />
       </div>
     );
   }
