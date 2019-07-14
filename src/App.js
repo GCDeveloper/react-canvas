@@ -217,6 +217,7 @@ class App extends Component {
                 [-1, 1, 0.5, 5],
               ];
               kernel = kernel.map(([kx, ky, magnitude, oppositeKI], idx) => {
+                //oppositeKI = frame%kernel.length;//Math.floor(Math.random() * kernel.length);
                 oppositeKI = Math.floor(Math.random() * kernel.length);
                 //calc the index and initial/previous value
                 const index = (x + kx + (y + ky) * w) * 4;
@@ -247,9 +248,21 @@ class App extends Component {
                 };
               });
               //apply changes to the data.
-              kernel.forEach(({ index, value }) => {
+              kernel.forEach(({ index, value }, ki) => {
                 if (value > 0 && value < 255) {
                   imageData.data[index + ic] = value;
+                }
+                let isWhite = false;
+                //for all other pixels around this pixel..
+                kernel.forEach(({ index }, kj) => {
+                  if (ki !== kj) {
+                    if (imageData.data[index + ic] >= 255) {
+                      isWhite = true;
+                    }
+                  }
+                });
+                if (isWhite) {
+                  imageData.data[index + ic] *= 0.99;
                 }
               });
               //for each pixel in kernel,
