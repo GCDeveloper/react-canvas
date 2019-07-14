@@ -47,7 +47,7 @@ class App extends Component {
   };
   onMouseMove = e => {
     if (!this.mouseIsDown) return;
-    const r = Math.random() * 16;
+    const r = Math.random() * 35;
     const rect = e.target.getBoundingClientRect();
     const x = ((e.pageX / rect.width) * rect.width) / 2 - rect.left / 2;
     const y = ((e.pageY / rect.height) * rect.height) / 2 - rect.top / 2;
@@ -208,14 +208,14 @@ class App extends Component {
                 [0, 1, 1, 1],
                 // //left
                 [-1, 0, 1, 2],
-                // //top-left
-                // [-1, -1, 0.5, 2],
-                // //top-right
-                // [1, -1, 0.5, 3],
-                // //bottom-right
-                // [1, 1, 0.5, 4],
-                // //bottom-left
-                // [-1, 1, 0.5, 1],
+                //top-left
+                [-1, -1, 0.5, 7],
+                //top-right
+                [1, -1, 0.5, 8],
+                //bottom-right
+                [1, 1, 0.5, 5],
+                //bottom-left
+                [-1, 1, 0.5, 6],
               ];
               kernel = kernel.map(([kx, ky, magnitude, oppositeKI], idx) => {
                 oppositeKI = frame % kernel.length; //Math.floor(Math.random() * kernel.length);
@@ -241,6 +241,7 @@ class App extends Component {
                 //     (Math.abs(opposite.value - value) / 64) * 0.5;
                 // }
                 value -= (value - opposite.value) / value;
+                value += (value - opposite.value) / 32;
                 return {
                   index,
                   value,
