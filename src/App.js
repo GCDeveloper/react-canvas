@@ -47,7 +47,7 @@ class App extends Component {
   };
   onMouseMove = e => {
     if (!this.mouseIsDown) return;
-    const r = (Math.random() * 10) / Math.min(1.5, frame / 1000);
+    const r = 20;
     const rect = e.target.getBoundingClientRect();
     const x = (e.pageX - rect.x) * 1.07 - r;
     const y = (e.pageY / this.w) * this.h * 1.065 - 2;
@@ -63,18 +63,18 @@ class App extends Component {
     // ctx.fillStyle = 'rgba(0,0,0,1)';
     // ctx.fillRect(0, 0, this.w, this.h);
     this.prev = { x: null, y: null };
-    for (let i = 0; i < 10; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const d = Math.random() * r * 7;
-      const xen = Math.cos(angle) * d;
-      const yen = Math.sin(angle) * d;
-      ctx.fillStyle = this.randomColour();
-      ctx.beginPath();
-      ctx.moveTo(x + xen, y + yen);
-      ctx.arc(x + r + xen, y + yen, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.closePath();
-    }
+    //for (let i = 0; i < 10; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const d = 0; //Math.random() * r * 7;
+    const xen = Math.cos(angle) * d;
+    const yen = Math.sin(angle) * d;
+    ctx.fillStyle = this.randomColour();
+    ctx.beginPath();
+    ctx.moveTo(x + xen, y + yen);
+    ctx.arc(x + r + xen, y + yen, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.closePath();
+    //}
   };
   update(mx, my) {
     let wav = (
@@ -195,40 +195,54 @@ class App extends Component {
               let r = (x + 1 + y * w) * 4;
               let u = (x + (y - 1) * w) * 4;
               let d = (x + (y + 1) * w) * 4;
-              imageData.data[l + ic] +=
-                ((imageData.data[r + ic] +
-                  imageData.data[u + ic] +
-                  imageData.data[d + ic]) /
-                  3 -
-                  imageData.data[l + ic]) /
-                8;
-              //}
-              //if (frame % 2 === 0) {
-              imageData.data[r + ic] +=
-                ((imageData.data[l + ic] +
-                  imageData.data[u + ic] +
-                  imageData.data[d + ic]) /
-                  3 -
-                  imageData.data[r + ic]) /
-                8;
-              // }
-              //if (frame % 2 === 0) {
-              imageData.data[u + ic] +=
-                ((imageData.data[r + ic] +
-                  imageData.data[l + ic] +
-                  imageData.data[d + ic]) /
-                  3 -
-                  imageData.data[u + ic]) /
-                8;
-              // }
-              // if (frame % 2 === 0) {
-              imageData.data[d + ic] +=
-                ((imageData.data[r + ic] +
-                  imageData.data[u + ic] +
-                  imageData.data[l + ic]) /
-                  3 -
-                  imageData.data[d + ic]) /
-                8;
+              imageData.data[l] += imageData.data[u] / 64;
+              imageData.data[r] += imageData.data[d] / 64;
+              imageData.data[u] += imageData.data[r] / 64;
+              imageData.data[d] += imageData.data[l] / 64;
+
+              if (Math.abs(imageData.data[l] - imageData.data[r]) < 64) {
+                imageData.data[l] *= 0.975;
+                imageData.data[r] *= 0.975;
+              }
+              if (Math.abs(imageData.data[u] - imageData.data[d]) < 64) {
+                imageData.data[u] *= 0.975;
+                imageData.data[d] *= 0.975;
+              }
+              // imageData.data[l + ic] +=
+              //   ((imageData.data[r + ic] +
+              //     imageData.data[r + ic] +
+              //     imageData.data[r + ic]) /
+              //     3 -
+              //     imageData.data[l + ic]) /
+              //   8;
+              // //}
+              // //if (frame % 2 === 0) {
+              // imageData.data[r + ic] +=
+              //   ((imageData.data[l + ic] +
+              //     imageData.data[l + ic] +
+              //     imageData.data[l + ic]) /
+              //     3 -
+              //     imageData.data[r + ic]) /
+              //   8;
+              // // }
+              // //if (frame % 2 === 0) {
+              // imageData.data[u + ic] +=
+              //   ((imageData.data[r + ic] +
+              //     imageData.data[r + ic] +
+              //     imageData.data[r + ic]) /
+              //     3 -
+              //     imageData.data[u + ic]) /
+              //   8 /
+              //   1;
+              // // }
+              // // if (frame % 2 === 0) {
+              // imageData.data[d + ic] +=
+              //   ((imageData.data[l + ic] +
+              //     imageData.data[l + ic] +
+              //     imageData.data[l + ic]) /
+              //     3 -
+              //     imageData.data[d + ic]) /
+              //   8;
             }
             // }
 
