@@ -178,9 +178,9 @@ class App extends Component {
         const i = (x + y * w) * 4;
         const j = (ax + ay * w) * 4;
         if (
-          imageData.data[i] > 64 ||
-          imageData.data[i + 1] > 64 ||
-          imageData.data[i + 2] > 64
+          imageData.data[i] > 0 ||
+          imageData.data[i + 1] > 0 ||
+          imageData.data[i + 2] > 0
         ) {
           //const val = valueB*dist*255 > 128? valueB : valueA;
           // const val = Math.sin(frame/16)+1;//valueA;
@@ -191,23 +191,81 @@ class App extends Component {
           if (x > 4 && x < w - 4 && y > 4 && y < h - 4) {
             //if (frame % 2 === 0) {
             for (let ic = 0; ic < 3; ic++) {
-              let l = (x - 1 + y * w) * 4;
-              let r = (x + 1 + y * w) * 4;
-              let u = (x + (y - 1) * w) * 4;
-              let d = (x + (y + 1) * w) * 4;
-              imageData.data[l] += imageData.data[u] / 64;
-              imageData.data[r] += imageData.data[d] / 64;
-              imageData.data[u] += imageData.data[r] / 64;
-              imageData.data[d] += imageData.data[l] / 64;
+              // let l = (x - 1 + y * w) * 4;
+              // let r = (x + 1 + y * w) * 4;
+              // let u = (x + (y - 1) * w) * 4;
+              // let d = (x + (y + 1) * w) * 4;
 
-              if (Math.abs(imageData.data[l] - imageData.data[r]) < 64) {
-                imageData.data[l] *= 0.975;
-                imageData.data[r] *= 0.975;
-              }
-              if (Math.abs(imageData.data[u] - imageData.data[d]) < 64) {
-                imageData.data[u] *= 0.975;
-                imageData.data[d] *= 0.975;
-              }
+              //let lu = (x - 1 + (y - 1) * w) * 4;
+              //x,y,value
+              let kernel = [
+                //top
+                [0, -1, 1, 2],
+                //right
+                [1, 0, 1, 3],
+                //bottom
+                [0, 1, 1, 0],
+                //left
+                [-1, 0, 1, 1],
+                // //top-left
+                // [-1, -1, 0.5, 6],
+                // //top-right
+                // [1, -1, 0.5, 7],
+                // //bottom-right
+                // [1, 1, 0.5, 4],
+                // //bottom-left
+                // [-1, 1, 0.5, 5],
+              ];
+              kernel = kernel.map(([kx, ky, magnitude, oppositeKI]) => {
+                oppositeKI = Math.floor(Math.random() * kernel.length);
+                //calc the index and initial/previous value
+                const index = (x + kx + (y + ky) * w) * 4;
+                const value = imageData.data[index + ic];
+                return {
+                  index,
+                  value,
+                  magnitude,
+                  oppositeKI,
+                };
+              });
+              //tranform the value using the opposite pixel
+              kernel = kernel.map(({ index, value, magnitude, oppositeKI }) => {
+                const opposite = kernel[oppositeKI];
+                value += (opposite.value - value) / 8;
+                return {
+                  index,
+                  value,
+                  magnitude,
+                  oppositeKI,
+                  opposite,
+                };
+              });
+              //apply changes to the data.
+              kernel.forEach(({ index, value }) => {
+                imageData.data[index + ic] = value;
+              });
+              //for each pixel in kernel,
+              //add value of opposite pixel / 64 with magnitude
+              // kernel.forEach(({ index, magnitude, oppositeKI }) => {
+              //   const opposite = kernel[oppositeKI];
+              //   imageData.data[index] +=
+              //     (imageData.data[opposite.index] / 64) * magnitude;
+              // });
+              // imageData.data[l] += imageData.data[r] / 64;
+              // imageData.data[r] += imageData.data[l] / 64;
+              // imageData.data[u] += imageData.data[r] / 64;
+              // imageData.data[d] += imageData.data[l] / 64;
+
+              //imageData.data[lu] += imageData.data[r] / 96;
+
+              // if (Math.abs(imageData.data[l] - imageData.data[r]) < 64) {
+              //   imageData.data[l] *= 0.975;
+              //   imageData.data[r] *= 0.975;
+              // }
+              // if (Math.abs(imageData.data[u] - imageData.data[d]) < 64) {
+              //   imageData.data[u] *= 0.975;
+              //   imageData.data[d] *= 0.975;
+              // }
               // imageData.data[l + ic] +=
               //   ((imageData.data[r + ic] +
               //     imageData.data[r + ic] +
