@@ -216,8 +216,8 @@ class App extends Component {
                 //bottom-left
                 [-1, 1, 0.5, 5],
               ];
-              kernel = kernel.map(([kx, ky, magnitude, oppositeKI]) => {
-                //oppositeKI = Math.floor(Math.random() * kernel.length);
+              kernel = kernel.map(([kx, ky, magnitude, oppositeKI], idx) => {
+                oppositeKI = Math.floor(Math.random() * kernel.length);
                 //calc the index and initial/previous value
                 const index = (x + kx + (y + ky) * w) * 4;
                 const value = imageData.data[index + ic];
@@ -233,9 +233,10 @@ class App extends Component {
                 const opposite = kernel[oppositeKI];
 
                 if (Math.abs(opposite.value - value) > 128) {
-                  value += Math.abs(opposite.value - value) / 64;
+                  value += (Math.abs(opposite.value - value) / 64) * 0.97;
                 } else {
-                  opposite.value += Math.abs(opposite.value - value) / 64;
+                  opposite.value +=
+                    (Math.abs(opposite.value - value) / 64) * 1.2;
                 }
                 return {
                   index,
