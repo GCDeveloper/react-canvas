@@ -231,9 +231,11 @@ class App extends Component {
               //tranform the value using the opposite pixel
               kernel = kernel.map(({ index, value, magnitude, oppositeKI }) => {
                 const opposite = kernel[oppositeKI];
-                value += opposite.value / 32;
+                value += Math.abs(opposite.value - value) / 32;
                 if (Math.abs(opposite.value - value) > 64) {
-                  value *= Math.abs(opposite.value - value) / 256;
+                  value *= 0.95;
+                  opposite.value *= 0.95;
+                } else {
                 }
                 return {
                   index,
@@ -245,7 +247,9 @@ class App extends Component {
               });
               //apply changes to the data.
               kernel.forEach(({ index, value }) => {
-                imageData.data[index + ic] = value;
+                if (value > 0 && value < 255) {
+                  imageData.data[index + ic] = value;
+                }
               });
               //for each pixel in kernel,
               //add value of opposite pixel / 64 with magnitude
