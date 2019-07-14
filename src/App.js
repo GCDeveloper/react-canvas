@@ -9,8 +9,8 @@ let tx, ty;
 let frame = 0;
 class App extends Component {
   resize() {
-    this.w = 640; //window.innerWidth;
-    this.h = 640; //window.innerHeight;
+    this.w = 320; //window.innerWidth;
+    this.h = 320; //window.innerHeight;
     this.canvasElement.width = this.w;
     this.canvasElement.height = this.h;
     ox = -this.w / 2;
@@ -47,10 +47,10 @@ class App extends Component {
   };
   onMouseMove = e => {
     if (!this.mouseIsDown) return;
-    const r = 20;
+    const r = Math.random() * 16;
     const rect = e.target.getBoundingClientRect();
-    const x = (e.pageX - rect.x) * 1.07 - r;
-    const y = (e.pageY / this.w) * this.h * 1.065 - 2;
+    const x = ((e.pageX / rect.width) * rect.width) / 2 - rect.left / 2;
+    const y = ((e.pageY / rect.height) * rect.height) / 2 - rect.top / 2;
     // const x = this.w / 2;
     // const y = this.h / 2;
     console.log(x, y);
@@ -199,26 +199,27 @@ class App extends Component {
               //let lu = (x - 1 + (y - 1) * w) * 4;
               //x,y,value
               let kernel = [
+                [0, 0, 1, 0],
                 //top
-                [0, -1, 1, 2],
-                //right
-                [1, 0, 1, 3],
+                [0, -1, 1, 3],
+                // //right
+                [1, 0, 1, 4],
                 //bottom
-                [0, 1, 1, 0],
-                //left
-                [-1, 0, 1, 1],
-                //top-left
-                [-1, -1, 0.5, 6],
-                //top-right
-                [1, -1, 0.5, 7],
-                //bottom-right
-                [1, 1, 0.5, 4],
-                //bottom-left
-                [-1, 1, 0.5, 5],
+                [0, 1, 1, 1],
+                // //left
+                [-1, 0, 1, 2],
+                // //top-left
+                // [-1, -1, 0.5, 2],
+                // //top-right
+                // [1, -1, 0.5, 3],
+                // //bottom-right
+                // [1, 1, 0.5, 4],
+                // //bottom-left
+                // [-1, 1, 0.5, 1],
               ];
               kernel = kernel.map(([kx, ky, magnitude, oppositeKI], idx) => {
-                //oppositeKI = frame%kernel.length;//Math.floor(Math.random() * kernel.length);
-                oppositeKI = Math.floor(Math.random() * kernel.length);
+                oppositeKI = frame % kernel.length; //Math.floor(Math.random() * kernel.length);
+                //oppositeKI = Math.floor(Math.random() * kernel.length);
                 //calc the index and initial/previous value
                 const index = (x + kx + (y + ky) * w) * 4;
                 const value = imageData.data[index + ic];
@@ -233,12 +234,13 @@ class App extends Component {
               kernel = kernel.map(({ index, value, magnitude, oppositeKI }) => {
                 const opposite = kernel[oppositeKI];
 
-                if (Math.abs(opposite.value - value) > 128) {
-                  value += (Math.abs(opposite.value - value) / 64) * 0.97;
-                } else {
-                  opposite.value +=
-                    (Math.abs(opposite.value - value) / 64) * 1.2;
-                }
+                // if (Math.abs(opposite.value - value) <= opposite.value) {
+                //   value += (Math.abs(opposite.value - value) / 64) * 0.5;
+                // } else {
+                //   opposite.value +=
+                //     (Math.abs(opposite.value - value) / 64) * 0.5;
+                // }
+                value -= (value - opposite.value) / 64;
                 return {
                   index,
                   value,
@@ -252,18 +254,24 @@ class App extends Component {
                 if (value > 0 && value < 255) {
                   imageData.data[index + ic] = value;
                 }
-                let isWhite = false;
-                //for all other pixels around this pixel..
-                kernel.forEach(({ index }, kj) => {
-                  if (ki !== kj) {
-                    if (imageData.data[index + ic] >= 255) {
-                      isWhite = true;
-                    }
-                  }
-                });
-                if (isWhite) {
-                  imageData.data[index + ic] *= 0.99;
-                }
+                // let isWhite = false;
+                // let isBlack = false;
+                // //for all other pixels around this pixel..
+                // kernel.forEach(({ index }, kj) => {
+                //   if (kj !== 0) {
+                //     if (imageData.data[index + ic] >= 128) {
+                //       isWhite = true;
+                //     }
+                //     if (imageData.data[index + ic] < 128) {
+                //       isBlack = true;
+                //     }
+                //   }
+                // });
+                // if (isWhite) {
+                //   imageData.data[index + ic] *= 0.7;
+                // } else if (isBlack) {
+                //   imageData.data[index + ic] *= 1.3;
+                // }
               });
               //for each pixel in kernel,
               //add value of opposite pixel / 64 with magnitude
