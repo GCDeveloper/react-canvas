@@ -231,11 +231,13 @@ class App extends Component {
               //tranform the value using the opposite pixel
               kernel = kernel.map(({ index, value, magnitude, oppositeKI }) => {
                 const opposite = kernel[oppositeKI];
-                value += Math.abs(opposite.value - value) / 32;
-                if (Math.abs(opposite.value - value) > 64) {
-                  value *= 0.95;
-                  opposite.value *= 0.95;
+
+                if (Math.abs(opposite.value - value) > 128) {
+                  value *= 0.97;
+                  opposite.value *= 1.02;
                 } else {
+                  value *= 1.02;
+                  opposite.value *= 0.95;
                 }
                 return {
                   index,
