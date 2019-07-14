@@ -240,7 +240,7 @@ class App extends Component {
                 //   opposite.value +=
                 //     (Math.abs(opposite.value - value) / 64) * 0.5;
                 // }
-                value -= (value - opposite.value) / 64;
+                value -= (value - opposite.value) / value;
                 return {
                   index,
                   value,
