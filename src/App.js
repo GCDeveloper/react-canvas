@@ -233,11 +233,9 @@ class App extends Component {
                 const opposite = kernel[oppositeKI];
 
                 if (Math.abs(opposite.value - value) > 128) {
-                  value *= 0.97;
-                  opposite.value *= 1.02;
+                  value += Math.abs(opposite.value - value) / 64;
                 } else {
-                  value *= 1.02;
-                  opposite.value *= 0.95;
+                  opposite.value += Math.abs(opposite.value - value) / 64;
                 }
                 return {
                   index,
