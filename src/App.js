@@ -231,7 +231,7 @@ class App extends Component {
               //tranform the value using the opposite pixel
               kernel = kernel.map(({ index, value, magnitude, oppositeKI }) => {
                 const opposite = kernel[oppositeKI];
-                value += (opposite.value - value) / 8;
+                value += opposite.value - value;
                 return {
                   index,
                   value,
