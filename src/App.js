@@ -207,14 +207,14 @@ class App extends Component {
                 [0, 1, 1, 0],
                 //left
                 [-1, 0, 1, 1],
-                // //top-left
-                // [-1, -1, 0.5, 6],
-                // //top-right
-                // [1, -1, 0.5, 7],
-                // //bottom-right
-                // [1, 1, 0.5, 4],
-                // //bottom-left
-                // [-1, 1, 0.5, 5],
+                //top-left
+                [-1, -1, 0.5, 6],
+                //top-right
+                [1, -1, 0.5, 7],
+                //bottom-right
+                [1, 1, 0.5, 4],
+                //bottom-left
+                [-1, 1, 0.5, 5],
               ];
               kernel = kernel.map(([kx, ky, magnitude, oppositeKI]) => {
                 oppositeKI = Math.floor(Math.random() * kernel.length);
@@ -231,7 +231,7 @@ class App extends Component {
               //tranform the value using the opposite pixel
               kernel = kernel.map(({ index, value, magnitude, oppositeKI }) => {
                 const opposite = kernel[oppositeKI];
-                value += opposite.value - value;
+                value += (opposite.value - value) / 0.9;
                 return {
                   index,
                   value,
