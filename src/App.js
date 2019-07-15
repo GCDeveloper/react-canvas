@@ -199,26 +199,30 @@ class App extends Component {
               //let lu = (x - 1 + (y - 1) * w) * 4;
               //x,y,value
               let kernel = [
-                [0, 0, 1, 0],
+                //[0, 0, 1, 0],
                 //top
-                [0, -1, 1, 3],
+                [0, -1, 1, 2],
                 // //right
-                [1, 0, 1, 4],
+                [1, 0, 1, 3],
                 //bottom
-                [0, 1, 1, 1],
+                [0, 1, 1, 0],
                 // //left
-                [-1, 0, 1, 2],
+                [-1, 0, 1, 1],
+
                 //top-left
-                [-1, -1, 0.5, 7],
+                [-1, -1, 0.5, 6],
                 //top-right
-                [1, -1, 0.5, 8],
+                [1, -1, 0.5, 7],
                 //bottom-right
-                [1, 1, 0.5, 5],
+                [1, 1, 0.5, 4],
                 //bottom-left
-                [-1, 1, 0.5, 6],
+                [-1, 1, 0.5, 5],
               ];
               kernel = kernel.map(([kx, ky, magnitude, oppositeKI], idx) => {
-                oppositeKI = frame % kernel.length; //Math.floor(Math.random() * kernel.length);
+                // kx = Math.floor(Math.random() * 3 - 1);
+                // ky = Math.floor(Math.random() * 3 - 1);
+                oppositeKI = Math.floor(Math.random() * kernel.length);
+                //oppositeKI = frame % kernel.length; //
                 //oppositeKI = Math.floor(Math.random() * kernel.length);
                 //calc the index and initial/previous value
                 const index = (x + kx + (y + ky) * w) * 4;
@@ -234,14 +238,14 @@ class App extends Component {
               kernel = kernel.map(({ index, value, magnitude, oppositeKI }) => {
                 const opposite = kernel[oppositeKI];
 
-                // if (Math.abs(opposite.value - value) <= opposite.value) {
-                //   value += (Math.abs(opposite.value - value) / 64) * 0.5;
-                // } else {
-                //   opposite.value +=
-                //     (Math.abs(opposite.value - value) / 64) * 0.5;
-                // }
-                value -= (value - opposite.value) / value;
-                value += (value - opposite.value) / 32;
+                if (!Math.abs(opposite.value - value) <= opposite.value * 1.5) {
+                  value += (Math.abs(opposite.value - value) / 32 - 0.01) * 0.9;
+                } else {
+                  opposite.value +=
+                    (Math.abs(opposite.value - value) / 32 - 0.01) * 0.9;
+                }
+                // value += (value - opposite.value) / 24;
+
                 return {
                   index,
                   value,
@@ -260,18 +264,18 @@ class App extends Component {
                 // //for all other pixels around this pixel..
                 // kernel.forEach(({ index }, kj) => {
                 //   if (kj !== 0) {
-                //     if (imageData.data[index + ic] >= 128) {
+                //     if (imageData.data[index + ic] >= 256 - 32) {
                 //       isWhite = true;
                 //     }
-                //     if (imageData.data[index + ic] < 128) {
+                //     if (imageData.data[index + ic] < 32) {
                 //       isBlack = true;
                 //     }
                 //   }
                 // });
                 // if (isWhite) {
-                //   imageData.data[index + ic] *= 0.7;
+                //   imageData.data[index + ic] *= 0.999;
                 // } else if (isBlack) {
-                //   imageData.data[index + ic] *= 1.3;
+                //   // imageData.data[index + ic]++;
                 // }
               });
               //for each pixel in kernel,
