@@ -1,0 +1,8 @@
+{
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#1F3301",
+    "titleBar.activeBackground": "#2B4702",
+    "titleBar.activeForeground": "#F2FEE0"
+  },
+  "terminal.integrated.cwd": "/Users/g.campbell/Documents/personal/react-canvas"
+}
