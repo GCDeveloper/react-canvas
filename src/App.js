@@ -9,8 +9,8 @@ let tx, ty;
 let frame = 0;
 class App extends Component {
   resize() {
-    this.w = 320; //window.innerWidth;
-    this.h = 320; //window.innerHeight;
+    this.w = 160; //window.innerWidth;
+    this.h = 160; //window.innerHeight;
     this.canvasElement.width = this.w;
     this.canvasElement.height = this.h;
     ox = -this.w / 2;
@@ -47,10 +47,10 @@ class App extends Component {
   };
   onMouseMove = e => {
     if (!this.mouseIsDown) return;
-    const r = Math.random() * 35;
+    const r = Math.random() * 10;
     const rect = e.target.getBoundingClientRect();
-    const x = ((e.pageX / rect.width) * rect.width) / 2 - rect.left / 2;
-    const y = ((e.pageY / rect.height) * rect.height) / 2 - rect.top / 2;
+    const x = ((e.pageX / rect.width / 2) * rect.width) / 2 - rect.left / 4;
+    const y = ((e.pageY / rect.height / 2) * rect.height) / 2 - rect.top / 4;
     // const x = this.w / 2;
     // const y = this.h / 2;
     console.log(x, y);
@@ -146,236 +146,255 @@ class App extends Component {
     const { ctx, w, h } = this;
     const imageData = ctx.getImageData(0, 0, w, h);
     // const openSimplex = new OpenSimplexNoise(seed);
-    const r = Math.random() * 0.03 + 0.96;
-    const g = Math.random() * 0.03 + 0.96;
-    const b = Math.random() * 0.03 + 0.96;
+    // const r = Math.random() * 0.03 + 0.96;
+    // const g = Math.random() * 0.03 + 0.96;
+    // const b = Math.random() * 0.03 + 0.96;
     for (let x = 0; x < w; x++) {
       for (let y = 0; y < h; y++) {
         //const valueA = (openSimplex.noise2D(x / zoom , y / zoom, frame/40) + 1);
         //const valueB = (openSimplex.noise2D(x / zoom*2 , y / zoom*2, frame/40) + 1);
         //const val = this.noiseMap[i];//(x / zoom , y / zoom) + 1)/2;
-        const angle =
-          (Math.atan2(y - h / 2, x - w / 2) * 180) / Math.PI +
-          Math.sin(frame / 80) * Math.PI;
-        const dist = Math.max(
-          0.1,
-          (1 -
-            (Math.sqrt(
-              (x - (w / 2 + Math.cos(frame / 50) * 10)) ** 2 +
-                (y - (h / 2 + Math.sin(frame / 50) * 10)) ** 2
-            ) /
-              Math.min(w, h)) *
-              (3.5 + Math.cos(frame / 20) * 0.5)) *
-            (32 + Math.cos(frame / 30) * 6)
-        );
-        const dist2 =
-          (1 -
-            Math.sqrt((x - w / 2) ** 2 + (y - h / 2) ** 2) /
-              ((w + h) / (Math.sin(frame / 40) * 2 + 3))) *
-          ((frame % 1000) / (Math.sin(frame / 500) * 250 + 750));
-        const ax = x + Math.round(Math.cos(angle) * dist);
-        const ay = y + Math.round(Math.sin(angle) * dist);
-        const i = (x + y * w) * 4;
-        const j = (ax + ay * w) * 4;
-        if (
-          imageData.data[i] > 0 ||
-          imageData.data[i + 1] > 0 ||
-          imageData.data[i + 2] > 0
-        ) {
-          //const val = valueB*dist*255 > 128? valueB : valueA;
-          // const val = Math.sin(frame/16)+1;//valueA;
-          imageData.data[i + 3] = 255;
-          // imageData.data[i] -= (imageData.data[i]-imageData.data[j])/(32+(Math.sin(frame/20)*6))*dist2;
-          // imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[j + 1])/(32+(Math.sin(frame/20)*6))*dist2;
-          // imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[j + 2])/(232+(Math.sin(frame/20)*6))*dist2;
-          if (x > 4 && x < w - 4 && y > 4 && y < h - 4) {
-            //if (frame % 2 === 0) {
-            for (let ic = 0; ic < 3; ic++) {
-              // let l = (x - 1 + y * w) * 4;
-              // let r = (x + 1 + y * w) * 4;
-              // let u = (x + (y - 1) * w) * 4;
-              // let d = (x + (y + 1) * w) * 4;
+        // const angle =
+        //   (Math.atan2(y - h / 2, x - w / 2) * 180) / Math.PI +
+        //   Math.sin(frame / 80) * Math.PI;
+        // const dist = Math.max(
+        //   0.1,
+        //   (1 -
+        //     (Math.sqrt(
+        //       (x - (w / 2 + Math.cos(frame / 50) * 10)) ** 2 +
+        //         (y - (h / 2 + Math.sin(frame / 50) * 10)) ** 2
+        //     ) /
+        //       Math.min(w, h)) *
+        //       (3.5 + Math.cos(frame / 20) * 0.5)) *
+        //     (32 + Math.cos(frame / 30) * 6)
+        // );
+        // const dist2 =
+        //   (1 -
+        //     Math.sqrt((x - w / 2) ** 2 + (y - h / 2) ** 2) /
+        //       ((w + h) / (Math.sin(frame / 40) * 2 + 3))) *
+        //   ((frame % 1000) / (Math.sin(frame / 500) * 250 + 750));
+        // const ax = x + Math.round(Math.cos(angle) * dist);
+        // const ay = y + Math.round(Math.sin(angle) * dist);
+        // const i = (x + y * w) * 4;
+        // const j = (ax + ay * w) * 4;
+        // if (
+        //   imageData.data[i] > 0 ||
+        //   imageData.data[i + 1] > 0 ||
+        //   imageData.data[i + 2] > 0
+        // ) {
+        //const val = valueB*dist*255 > 128? valueB : valueA;
+        // const val = Math.sin(frame/16)+1;//valueA;
+        //imageData.data[i + 3] = 255;
+        // imageData.data[i] -= (imageData.data[i]-imageData.data[j])/(32+(Math.sin(frame/20)*6))*dist2;
+        // imageData.data[i + 1] -= (imageData.data[i + 1]-imageData.data[j + 1])/(32+(Math.sin(frame/20)*6))*dist2;
+        // imageData.data[i + 2] -= (imageData.data[i + 2]-imageData.data[j + 2])/(232+(Math.sin(frame/20)*6))*dist2;
+        if (x > 4 && x < w - 4 && y > 4 && y < h - 4) {
+          //if (frame % 2 === 0) {
+          //const i = (x + y * w) * 4;
+          //let skip = 0;
+          for (let ic = 0; ic < 3; ic++) {
+            // let l = (x - 1 + y * w) * 4;
+            // let r = (x + 1 + y * w) * 4;
+            // let u = (x + (y - 1) * w) * 4;
+            // let d = (x + (y + 1) * w) * 4;
 
-              //let lu = (x - 1 + (y - 1) * w) * 4;
-              //x,y,value
-              let kernel = [
-                //[0, 0, 1, 0],
-                //top
-                [0, -1, 1, 2],
-                // //right
-                [1, 0, 1, 3],
-                //bottom
-                [0, 1, 1, 0],
-                // //left
-                [-1, 0, 1, 1],
+            //let lu = (x - 1 + (y - 1) * w) * 4;
+            //x,y,value
+            let kernel = [
+              //[0, 0, 1, 0],
+              //top
+              [0, -1, 1, 2],
+              // //right
+              [1, 0, 1, 3],
+              //bottom
+              [0, 1, 1, 0],
+              // //left
+              [-1, 0, 1, 1],
 
-                //top-left
-                [-1, -1, 0.5, 6],
-                //top-right
-                [1, -1, 0.5, 7],
-                //bottom-right
-                [1, 1, 0.5, 4],
-                //bottom-left
-                [-1, 1, 0.5, 5],
-              ];
-              kernel = kernel.map(([kx, ky, magnitude, oppositeKI], idx) => {
-                // kx = Math.floor(Math.random() * 3 - 1);
-                // ky = Math.floor(Math.random() * 3 - 1);
-                oppositeKI = Math.floor(Math.random() * kernel.length);
-                //oppositeKI = frame % kernel.length; //
-                //oppositeKI = Math.floor(Math.random() * kernel.length);
-                //calc the index and initial/previous value
-                const index = (x + kx + (y + ky) * w) * 4;
-                const value = imageData.data[index + ic];
-                return {
-                  index,
-                  value,
-                  magnitude,
-                  oppositeKI,
-                };
-              });
-              //tranform the value using the opposite pixel
-              kernel = kernel.map(({ index, value, magnitude, oppositeKI }) => {
-                const opposite = kernel[oppositeKI];
+              // //top-left
+              // [-1, -1, 0.5, 6],
+              // //top-right
+              // [1, -1, 0.5, 7],
+              // //bottom-right
+              // [1, 1, 0.5, 4],
+              // //bottom-left
+              // [-1, 1, 0.5, 5],
+            ];
+            kernel = kernel.map(([kx, ky, magnitude, oppositeKI], idx) => {
+              // kx = Math.floor(Math.random() * 3 - 1);
+              // ky = Math.floor(Math.random() * 3 - 1);
+              oppositeKI = Math.floor(Math.random() * kernel.length);
+              //oppositeKI = frame % kernel.length; //
+              //oppositeKI = Math.floor(Math.random() * kernel.length);
+              //calc the index and initial/previous value
+              const index = (x + kx + (y + ky) * w) * 4;
+              const value = imageData.data[index + ic];
+              return {
+                index,
+                value,
+                magnitude,
+                oppositeKI,
+              };
+            });
+            //tranform the value using the opposite pixel
+            kernel = kernel.map(({ index, value, magnitude, oppositeKI }) => {
+              const opposite = kernel[oppositeKI];
+              let b4 = value;
+              if (!Math.abs(opposite.value - value) <= opposite.value * 1.5) {
+                value +=
+                  (Math.abs(opposite.value - value) / 32 - 0.01) *
+                  (1.5 - value / 255) *
+                  Math.cos(Date.now() / 5000) *
+                  6;
+              } else {
+                opposite.value +=
+                  (Math.abs(opposite.value - value) / 32 - 0.01) *
+                  (1.5 - opposite.value / 255) *
+                  Math.sin(Date.now() / 5000) *
+                  6;
+              }
+              //if (value - b4 > 1) value = b4;
+              // value += (value - opposite.value) / 24;
 
-                if (!Math.abs(opposite.value - value) <= opposite.value * 1.5) {
-                  value += (Math.abs(opposite.value - value) / 32 - 0.01) * 0.9;
-                } else {
-                  opposite.value +=
-                    (Math.abs(opposite.value - value) / 32 - 0.01) * 0.9;
-                }
-                // value += (value - opposite.value) / 24;
-
-                return {
-                  index,
-                  value,
-                  magnitude,
-                  oppositeKI,
-                  opposite,
-                };
-              });
-              //apply changes to the data.
-              kernel.forEach(({ index, value }, ki) => {
-                if (value > 0 && value < 255) {
-                  imageData.data[index + ic] = value;
-                }
-                // let isWhite = false;
-                // let isBlack = false;
-                // //for all other pixels around this pixel..
-                // kernel.forEach(({ index }, kj) => {
-                //   if (kj !== 0) {
-                //     if (imageData.data[index + ic] >= 256 - 32) {
-                //       isWhite = true;
-                //     }
-                //     if (imageData.data[index + ic] < 32) {
-                //       isBlack = true;
-                //     }
-                //   }
-                // });
-                // if (isWhite) {
-                //   imageData.data[index + ic] *= 0.999;
-                // } else if (isBlack) {
-                //   // imageData.data[index + ic]++;
-                // }
-              });
-              //for each pixel in kernel,
-              //add value of opposite pixel / 64 with magnitude
-              // kernel.forEach(({ index, magnitude, oppositeKI }) => {
-              //   const opposite = kernel[oppositeKI];
-              //   imageData.data[index] +=
-              //     (imageData.data[opposite.index] / 64) * magnitude;
+              return {
+                index,
+                value,
+                magnitude,
+                oppositeKI,
+                opposite,
+              };
+            });
+            //apply changes to the data.
+            kernel.forEach(({ index, value }, ki) => {
+              if (
+                value > 0 &&
+                value < 255 &&
+                imageData.data[index + ic] !== value
+              ) {
+                imageData.data[index + ic] = value;
+              }
+              if (Math.random() > 0.5) return;
+              // let isWhite = false;
+              // let isBlack = false;
+              // //for all other pixels around this pixel..
+              // kernel.forEach(({ index }, kj) => {
+              //   if (kj !== 0) {
+              //     if (imageData.data[index + ic] >= 256 - 32) {
+              //       isWhite = true;
+              //     }
+              //     if (imageData.data[index + ic] < 32) {
+              //       isBlack = true;
+              //     }
+              //   }
               // });
-              // imageData.data[l] += imageData.data[r] / 64;
-              // imageData.data[r] += imageData.data[l] / 64;
-              // imageData.data[u] += imageData.data[r] / 64;
-              // imageData.data[d] += imageData.data[l] / 64;
-
-              //imageData.data[lu] += imageData.data[r] / 96;
-
-              // if (Math.abs(imageData.data[l] - imageData.data[r]) < 64) {
-              //   imageData.data[l] *= 0.975;
-              //   imageData.data[r] *= 0.975;
+              // if (isWhite) {
+              //   imageData.data[index + ic] *= 0.999;
+              // } else if (isBlack) {
+              //   // imageData.data[index + ic]++;
               // }
-              // if (Math.abs(imageData.data[u] - imageData.data[d]) < 64) {
-              //   imageData.data[u] *= 0.975;
-              //   imageData.data[d] *= 0.975;
-              // }
-              // imageData.data[l + ic] +=
-              //   ((imageData.data[r + ic] +
-              //     imageData.data[r + ic] +
-              //     imageData.data[r + ic]) /
-              //     3 -
-              //     imageData.data[l + ic]) /
-              //   8;
-              // //}
-              // //if (frame % 2 === 0) {
-              // imageData.data[r + ic] +=
-              //   ((imageData.data[l + ic] +
-              //     imageData.data[l + ic] +
-              //     imageData.data[l + ic]) /
-              //     3 -
-              //     imageData.data[r + ic]) /
-              //   8;
-              // // }
-              // //if (frame % 2 === 0) {
-              // imageData.data[u + ic] +=
-              //   ((imageData.data[r + ic] +
-              //     imageData.data[r + ic] +
-              //     imageData.data[r + ic]) /
-              //     3 -
-              //     imageData.data[u + ic]) /
-              //   8 /
-              //   1;
-              // // }
-              // // if (frame % 2 === 0) {
-              // imageData.data[d + ic] +=
-              //   ((imageData.data[l + ic] +
-              //     imageData.data[l + ic] +
-              //     imageData.data[l + ic]) /
-              //     3 -
-              //     imageData.data[d + ic]) /
-              //   8;
-            }
+            });
+            // if (imageData.data[i + ic] <= 0) skip++;
+            // if (skip === 3) {
+            //   return;
             // }
-
-            // imageData.data[l] += imageData.data[u] / 64;
-            // imageData.data[r] += imageData.data[d] / 64;
+            //for each pixel in kernel,
+            //add value of opposite pixel / 64 with magnitude
+            // kernel.forEach(({ index, magnitude, oppositeKI }) => {
+            //   const opposite = kernel[oppositeKI];
+            //   imageData.data[index] +=
+            //     (imageData.data[opposite.index] / 64) * magnitude;
+            // });
+            // imageData.data[l] += imageData.data[r] / 64;
+            // imageData.data[r] += imageData.data[l] / 64;
             // imageData.data[u] += imageData.data[r] / 64;
             // imageData.data[d] += imageData.data[l] / 64;
 
+            //imageData.data[lu] += imageData.data[r] / 96;
+
             // if (Math.abs(imageData.data[l] - imageData.data[r]) < 64) {
-            //   imageData.data[l] *= 0.99;
-            //   imageData.data[r] *= 0.99;
+            //   imageData.data[l] *= 0.975;
+            //   imageData.data[r] *= 0.975;
             // }
             // if (Math.abs(imageData.data[u] - imageData.data[d]) < 64) {
-            //   imageData.data[u] *= 0.99;
-            //   imageData.data[d] *= 0.99;
+            //   imageData.data[u] *= 0.975;
+            //   imageData.data[d] *= 0.975;
             // }
-
-            //  if(Math.random() > 0.5){
-            //   imageData.data[l+1] += Math.round(Math.sin(frame/10)*2);
-            //  }
-            //  if(Math.random() > 0.5){
-            //   imageData.data[r+1] += Math.round(Math.sin(frame/20)*2);
-            //  }
-            //  if(Math.random() > 0.5){
-            //   imageData.data[u+1] += Math.round(Math.sin(frame/30)*2);
-            //  }
-            //  if(Math.random() > 0.5){
-            //   imageData.data[d+1] += Math.round(Math.sin(frame/40)*2);
-            //  }
-
-            // imageData.data[l + 1] += Math.floor(Math.random()*2);
-            // imageData.data[r + 1] += Math.floor(Math.random()*2);
-            // imageData.data[u + 1] += Math.floor(Math.random()*2);
-            // imageData.data[d + 1] += Math.floor(Math.random()*2);
-
-            // imageData.data[l + 2] += Math.floor(Math.random()*2);
-            // imageData.data[r + 2] += Math.floor(Math.random()*2);
-            // imageData.data[u + 2] += Math.floor(Math.random()*2);
-            // imageData.data[d + 2] += Math.floor(Math.random()*2);
+            // imageData.data[l + ic] +=
+            //   ((imageData.data[r + ic] +
+            //     imageData.data[r + ic] +
+            //     imageData.data[r + ic]) /
+            //     3 -
+            //     imageData.data[l + ic]) /
+            //   8;
+            // //}
+            // //if (frame % 2 === 0) {
+            // imageData.data[r + ic] +=
+            //   ((imageData.data[l + ic] +
+            //     imageData.data[l + ic] +
+            //     imageData.data[l + ic]) /
+            //     3 -
+            //     imageData.data[r + ic]) /
+            //   8;
+            // // }
+            // //if (frame % 2 === 0) {
+            // imageData.data[u + ic] +=
+            //   ((imageData.data[r + ic] +
+            //     imageData.data[r + ic] +
+            //     imageData.data[r + ic]) /
+            //     3 -
+            //     imageData.data[u + ic]) /
+            //   8 /
+            //   1;
+            // // }
+            // // if (frame % 2 === 0) {
+            // imageData.data[d + ic] +=
+            //   ((imageData.data[l + ic] +
+            //     imageData.data[l + ic] +
+            //     imageData.data[l + ic]) /
+            //     3 -
+            //     imageData.data[d + ic]) /
+            //   8;
           }
+          // }
+
+          // imageData.data[l] += imageData.data[u] / 64;
+          // imageData.data[r] += imageData.data[d] / 64;
+          // imageData.data[u] += imageData.data[r] / 64;
+          // imageData.data[d] += imageData.data[l] / 64;
+
+          // if (Math.abs(imageData.data[l] - imageData.data[r]) < 64) {
+          //   imageData.data[l] *= 0.99;
+          //   imageData.data[r] *= 0.99;
+          // }
+          // if (Math.abs(imageData.data[u] - imageData.data[d]) < 64) {
+          //   imageData.data[u] *= 0.99;
+          //   imageData.data[d] *= 0.99;
+          // }
+
+          //  if(Math.random() > 0.5){
+          //   imageData.data[l+1] += Math.round(Math.sin(frame/10)*2);
+          //  }
+          //  if(Math.random() > 0.5){
+          //   imageData.data[r+1] += Math.round(Math.sin(frame/20)*2);
+          //  }
+          //  if(Math.random() > 0.5){
+          //   imageData.data[u+1] += Math.round(Math.sin(frame/30)*2);
+          //  }
+          //  if(Math.random() > 0.5){
+          //   imageData.data[d+1] += Math.round(Math.sin(frame/40)*2);
+          //  }
+
+          // imageData.data[l + 1] += Math.floor(Math.random()*2);
+          // imageData.data[r + 1] += Math.floor(Math.random()*2);
+          // imageData.data[u + 1] += Math.floor(Math.random()*2);
+          // imageData.data[d + 1] += Math.floor(Math.random()*2);
+
+          // imageData.data[l + 2] += Math.floor(Math.random()*2);
+          // imageData.data[r + 2] += Math.floor(Math.random()*2);
+          // imageData.data[u + 2] += Math.floor(Math.random()*2);
+          // imageData.data[d + 2] += Math.floor(Math.random()*2);
         }
+        //}
       }
     }
     ctx.putImageData(imageData, 0, 0);
@@ -399,26 +418,26 @@ class App extends Component {
     //   ctx.fillRect(0, 0, w, h);
     // }
 
-    const r = Math.floor(Math.sin((frame + 20) / 60.7) * 100 + 156);
-    const g = Math.floor(Math.sin((frame + 10) / 43.4) * 100 + 156);
-    const b = Math.floor(Math.sin(frame / 52.3) * 100 + 156);
-    dots.forEach(({ x, y }) => {
-      ctx.strokeStyle = `rgb(${r},${g},${b})`;
-      ctx.beginPath();
-      if (prev.x !== null && prev.y !== null) {
-        //ctx.moveTo(Math.round(prev.x - ox), Math.round(prev.y - oy));
-        // ctx.lineTo(Math.round(x - ox), Math.round(y - oy));
-      }
-      ctx.closePath();
-      ctx.stroke();
-      // ctx.moveTo(Math.round(x+r-ox), Math.round(y-oy));
-      //  ctx.arc(Math.round(x-ox), Math.round(y-oy), r, 0, Math.PI*2);
+    // const r = Math.floor(Math.sin((frame + 20) / 60.7) * 100 + 156);
+    // const g = Math.floor(Math.sin((frame + 10) / 43.4) * 100 + 156);
+    // const b = Math.floor(Math.sin(frame / 52.3) * 100 + 156);
+    // dots.forEach(({ x, y }) => {
+    //   ctx.strokeStyle = `rgb(${r},${g},${b})`;
+    //   ctx.beginPath();
+    //   if (prev.x !== null && prev.y !== null) {
+    //     //ctx.moveTo(Math.round(prev.x - ox), Math.round(prev.y - oy));
+    //     // ctx.lineTo(Math.round(x - ox), Math.round(y - oy));
+    //   }
+    //   ctx.closePath();
+    //   ctx.stroke();
+    //   // ctx.moveTo(Math.round(x+r-ox), Math.round(y-oy));
+    //   //  ctx.arc(Math.round(x-ox), Math.round(y-oy), r, 0, Math.PI*2);
 
-      this.prev = {
-        x,
-        y,
-      };
-    });
+    //   this.prev = {
+    //     x,
+    //     y,
+    //   };
+    // });
 
     //ctx.fillStyle = 'white';
 
@@ -428,7 +447,7 @@ class App extends Component {
   }
   loop() {
     frame++;
-    this.update(mx, my);
+    //this.update(mx, my);
     this.draw();
 
     // while (frame % 40 !== 0) {
@@ -441,9 +460,9 @@ class App extends Component {
   }
   componentDidMount() {
     this.resize();
-    window.addEventListener('resize', () => {
-      this.resize();
-    });
+    // window.addEventListener('resize', () => {
+    //   this.resize();
+    // });
     document.addEventListener('mousemove', e => {
       mx = e.pageX;
       my = e.pageY;
